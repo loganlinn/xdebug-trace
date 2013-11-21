@@ -1,6 +1,9 @@
 (ns xdebug-trace.view.index
   (:require [xdebug-trace.view.layout :refer [defpage]]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Public
+
 (defpage index []
   (defblock content
     [:div.hero-unit

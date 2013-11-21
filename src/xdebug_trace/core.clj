@@ -4,6 +4,9 @@
             [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Public
+
 (defn -main [& [path limit offset]]
   (let [limit (if limit (Long/parseLong limit) 1000)
         offset (if offset (Long/parseLong offset) 0)]

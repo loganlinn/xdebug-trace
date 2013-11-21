@@ -5,6 +5,17 @@
 
 (def ^:dynamic *request* nil)
 
+(defn- build-blocks
+  [body]
+  (into {} (for [[op & form-body] body]
+             (condp = op
+               'defblock (let [[block-name & block-body] form-body]
+                           [(keyword block-name) block-body])
+               :else (throw (RuntimeException. "Unexpected form"))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Public
+
 (defmacro with-request
   "Macro to bind a request to rendering scope"
   [request & body]
@@ -16,14 +27,6 @@
   (fn [request]
     (with-request request
       (handler request))))
-
-(defn- build-blocks
-  [body]
-  (into {} (for [[op & form-body] body]
-             (condp = op
-               'defblock (let [[block-name & block-body] form-body]
-                           [(keyword block-name) block-body])
-               :else (throw (RuntimeException. "Unexpected form"))))))
 
 (defmacro defpage
   [title bindings & body]

@@ -1,4 +1,5 @@
 (ns xdebug-trace.view.trace
+  "Renders HTML for viewing trace"
   (:require [xdebug-trace.view.layout :refer [defpage]]
             [hiccup.page :as page]))
 
@@ -16,8 +17,7 @@
     (let [diff (* 1000 (- end start))]
       (cond
         (> diff 10.) "badge-important"
-        (<= diff 1.) nil
-        :else "badge-info"))))
+        (> diff 0.1) "badge-info"))))
 
 (defn mem-label [[start end]]
   (if-not end
@@ -25,8 +25,8 @@
     (let [diff (- end start)]
       (cond
         (= end start) "0"
-        (> end start) (str "+" (- end start))
-        :else (- end start)))))
+        (> diff 0) (str "+" diff)
+        :else diff))))
 
 (defn mem-class [[start end]]
   (when end
@@ -50,21 +50,26 @@
          {:data-toggle "collapse"
           :href (str "#" collapse-id)}
          [:h4.fn-name fn-name
-          [:span.time-diff.badge
+          [:span.time-diff.badge.pull-right
            {:class (time-class time)} (time-label time)]
-          [:span.memory-diff.badge
+          [:span.memory-diff.badge.pull-right
            {:class (mem-class memory)} (mem-label memory)]]]]
        [:div.accordion-body.collapse
         {:id collapse-id
          :class (if (< depth intial-collapse-depth) "in")}
         [:div.accordion-inner
-         [:code.location.muted [:span.file file] ":" [:span.line-num line-num]]
-         (map (fn [arg] [:code.argument.muted arg]) arguments)
+         [:div [:code.location.muted [:span.file file] ":" [:span.line-num line-num]]]
+         [:div (map (fn [arg] [:code.argument.muted arg]) arguments)]
          (if (seq sub-traces)
            (render-trace-fns sub-traces))]]])))
 
 (defn render-trace-fns [trace]
   [:div.trace.accordion (map render-trace-fn trace)])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Public
+
+(defn trace-url [trace-name] (str "/trace/" trace-name))
 
 (defpage render-trace [trace]
   (defblock head-end
@@ -73,3 +78,14 @@
     [:div.row
      [:div.span12
       (render-trace-fns trace)]]))
+
+;; TODO Don't take Files
+(defpage render-traces [trace-files]
+  (defblock content
+    [:div.row
+     [:div.span12
+      (for [^java.io.File f trace-files]
+        (let [filename (.getName f)
+              trace-name (.substring filename 0 (.lastIndexOf filename "."))]
+          [:a {:href (trace-url trace-name)} trace-name]))
+      ]]))
