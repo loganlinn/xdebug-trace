@@ -12,5 +12,6 @@
 (defn user-defined? [line] (= (nth line 6) "1"))
 (defn file [line] (nth line 8))
 (defn line-num [line] (read-string (nth line 9)))
+(defn arguments [line] (drop 11 line))
 
 (defn line? [line] (and (seq line) (#{\0 \1 \2 \3 \4 \5 \6 \7 \8 \9} (ffirst line))))

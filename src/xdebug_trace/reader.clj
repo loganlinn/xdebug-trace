@@ -1,4 +1,4 @@
-(ns xdebug-trace.parser
+(ns xdebug-trace.reader
   (:require [xdebug-trace.line :as l]
             [clojure.pprint :refer [pprint]]
             [clojure.zip :as zip]
@@ -20,7 +20,8 @@
     :memory [(l/memory line)]
     :user-defined? (l/user-defined? line)
     :file (l/file line)
-    :line-num (l/line-num line)}
+    :line-num (l/line-num line)
+    :arguments (l/arguments line)}
    []])
 
 (defn exit-node [node line]
@@ -85,4 +86,4 @@
 (defn -main [& [path]]
   (with-open [rdr (io/reader path)]
     (let [lines (trace-line-seq rdr)]
-      (pprint (read-trace (take 100 lines))))))
+      (pprint ((read-trace (take 10 lines)))))))
