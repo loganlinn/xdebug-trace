@@ -35,7 +35,7 @@
   ([] (zipper (make-root)))
   ([root] (zip/zipper (constantly true) node-children make-node root)))
 
-(defn matching-child? [node line] (= (-> node node-data :fn-num) (l/fn-num line)))
+(defn expected-exit? [node line] (= (-> node node-data :fn-num) (l/fn-num line)))
 
 (defn enter-fn [loc line]
   (-> loc
@@ -53,11 +53,14 @@
   If it's an entry line, we push a level to stack, otherwise collect exiting
   time/memory and pop stack."
   [loc line]
-  (if (l/entry-line? line)
+  (cond
+    (l/entry-line? line)
     (enter-fn loc line)
-    (if (matching-child? (zip/node loc) line)
-      (exit-fn loc line)
-      (throw (Exception. (str "Unmatching child: " line))))))
+
+    (expected-exit? (zip/node loc) line)
+    (exit-fn loc line)
+
+    :else (throw (RuntimeException. (str "Unmatching child: " line)))))
 
 (defn read-trace [lines]
   (let [z (zipper)]
