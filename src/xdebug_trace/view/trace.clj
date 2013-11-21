@@ -26,7 +26,7 @@
       (cond
         (= end start) "0"
         (> end start) (str "+" (- end start))
-        :else (str "-" (- end start))))))
+        :else (- end start)))))
 
 (defn mem-class [[start end]]
   (when end
