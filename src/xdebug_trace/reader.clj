@@ -65,9 +65,10 @@
   If it's an entry line, we push a level to stack, otherwise collect exiting
   time/memory and pop stack."
   [loc line]
-  (if (l/entry-line? line)
-    (enter-fn loc line)
-    (exit-fn loc line)))
+  (if-not (l/line? line) loc
+    (if (l/entry-line? line)
+      (enter-fn loc line)
+      (exit-fn loc line))))
 
 (defn read-trace [lines]
   (let [root-node (make-root)
@@ -82,8 +83,3 @@
   (->> (line-seq rdr)
        (map #(str/split % #"\t"))
        (drop-while #(or (not (l/line? %)) (not (l/entry-line? %))))))
-
-(defn -main [& [path]]
-  (with-open [rdr (io/reader path)]
-    (let [lines (trace-line-seq rdr)]
-      (pprint ((read-trace (take 10 lines)))))))

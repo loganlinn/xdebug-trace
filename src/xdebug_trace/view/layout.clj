@@ -38,7 +38,7 @@
           (page/include-css "/css/bootstrap.min.css")
           ~@(:head-end blocks)]
          [:body
-          [:div#content.large-12.columns
+          [:div.container
            ~@(:content blocks)]
           (page/include-js "http://code.jquery.com/jquery.js"
                            "/js/bootstrap.min.js")

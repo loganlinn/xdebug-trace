@@ -14,12 +14,12 @@
             [environ.core :refer [env]]))
 
 (defn get-trace [path limit offset]
-  (let [limit (if limit (Long/parseLong limit) 3000)
+  (let [limit (if limit (Long/parseLong limit) 1e6)
         offset (if offset (Long/parseLong offset) 0)]
     (with-open [rdr (io/reader (io/resource (str "traces/" path)))]
       (->> (reader/trace-line-seq rdr)
            (drop offset)
-           (take limit)
+           ;(take limit)
            (reader/read-trace)
            (view.trace/render-trace)))))
 
