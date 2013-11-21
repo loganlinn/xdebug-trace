@@ -1,4 +1,4 @@
-(ns xdebug-trace.core
+(ns xdebug-trace.parser
   (:require [xdebug-trace.line :as l]
             [clojure.pprint :refer [pprint]]
             [clojure.zip :as zip]
@@ -54,18 +54,16 @@
   time/memory and pop stack."
   [loc line]
   (cond
-    (l/entry-line? line)
-    (enter-fn loc line)
-
-    (expected-exit? (zip/node loc) line)
-    (exit-fn loc line)
-
+    (l/entry-line? line)                 (enter-fn loc line)
+    (expected-exit? (zip/node loc) line) (exit-fn loc line)
     :else (throw (RuntimeException. (str "Unmatching child: " line)))))
 
 (defn read-trace [lines]
-  (let [z (zipper)]
-    (-> (reduce accept-line z lines)
-        zip/root)))
+  (let [root-node (make-root)
+        loc (zipper root-node)]
+    (-> (reduce accept-line loc lines)
+        zip/root
+        node-children)))
 
 (defn trace-line-seq
   "Returns lazy sequence of lines "
