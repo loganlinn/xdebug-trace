@@ -38,8 +38,6 @@
   ([] (zipper (make-root)))
   ([root] (zip/zipper (constantly true) node-children make-node root)))
 
-(defn expected-exit? [node line] (= (-> node node-value :fn-num) (l/fn-num line)))
-
 (defn assoc-depth [loc depth]
   (zip/edit loc assoc-in [0 :depth] depth))
 
@@ -51,7 +49,12 @@
         zip/rightmost
         (assoc-depth (inc depth)))))
 
-(defn exit-fn [loc line]
+(defn expected-exit? [loc line]
+  (= (-> loc zip/node node-value :fn-num) (l/fn-num line)))
+
+(defn exit-fn
+  [loc line]
+  {:pre [(expected-exit? loc line)]}
   (-> loc
       (zip/edit exit-node line)
       zip/up))
@@ -61,10 +64,9 @@
   If it's an entry line, we push a level to stack, otherwise collect exiting
   time/memory and pop stack."
   [loc line]
-  (cond
-    (l/entry-line? line)                 (enter-fn loc line)
-    (expected-exit? (zip/node loc) line) (exit-fn loc line)
-    :else (throw (RuntimeException. (str "Unmatching line " line)))))
+  (if (l/entry-line? line)
+    (enter-fn loc line)
+    (exit-fn loc line)))
 
 (defn read-trace [lines]
   (let [root-node (make-root)
