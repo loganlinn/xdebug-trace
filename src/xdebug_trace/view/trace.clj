@@ -1,6 +1,7 @@
 (ns xdebug-trace.view.trace
   "Renders HTML for viewing trace"
   (:require [xdebug-trace.view.layout :refer [defpage]]
+            [xdebug-trace.view.util :refer [filepath->repo-url]]
             [clj-time.coerce :as tc]
             [clj-time.format :as tf]
             [hiccup.page :as page]))
@@ -60,7 +61,12 @@
         {:id collapse-id
          :class (if (< depth intial-collapse-depth) "in")}
         [:div.accordion-inner
-         [:div [:code.location.muted [:span.file file] ":" [:span.line-num line-num]]]
+         [:div
+          [:code.location.muted
+           (let [loc (str file ":" line-num)]
+             (if-let [url (filepath->repo-url file line-num)]
+               [:a {:href url :target "_blank"} loc]
+               loc))]]
          [:div (map (fn [arg] [:code.argument.muted arg]) arguments)]
          (if (seq sub-traces)
            (render-trace-fns sub-traces))]]])))
