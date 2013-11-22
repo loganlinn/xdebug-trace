@@ -35,8 +35,8 @@
      (l/level line)
      (l/fn-name line)
      (l/fn-num line)
-     [(l/time line)]
-     [(l/memory line)]
+     [(l/time line) nil]
+     [(l/memory line) nil]
      (l/user-defined? line)
      (l/file line)
      (l/line-num line)
