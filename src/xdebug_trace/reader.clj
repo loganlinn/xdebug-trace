@@ -3,25 +3,12 @@
   Traces are a nested data structure of the form: [fn-info sub-traces]
   where sub-traces is a sequence of traces"
   (:require [xdebug-trace.line :as l]
+            [xdebug-trace.trace :as trace]
             [clojure.pprint :refer [pprint]]
             [clojure.zip :as zip]
             [clojure.string :as str]
             [clojure.java.io :as io])
   (:import java.io.Reader))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Records
-
-(defrecord TraceNode
-  [level
-   fn-name
-   fn-num
-   time
-   memory
-   user-defined?
-   file
-   line-num
-   arguments])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Zipper Constructs
@@ -31,10 +18,10 @@
 ;; node: [value children]
 ;; children: [node ...]
 (defn line->node [line]
-  [(TraceNode.
-     (l/level line)
+  [(trace/->TraceFunction
      (l/fn-name line)
      (l/fn-num line)
+     (l/level line)
      [(l/time line) nil]
      [(l/memory line) nil]
      (l/user-defined? line)
@@ -87,10 +74,10 @@
   If it's an entry line, we push a level to stack, otherwise collect exiting
   time/memory and pop stack."
   [loc line]
-  (if-not (l/line? line) loc
-    (if (l/entry-line? line)
-      (enter-fn loc line)
-      (exit-fn loc line))))
+  (cond
+    (not (l/line? line)) loc
+    (l/entry-line? line) (enter-fn loc line)
+    :else (exit-fn loc line)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
