@@ -1,3 +1,21 @@
 .trace .badge {
   margin-left: 10px;
 }
+
+.trace [data-depth="1"],
+.trace [data-depth="3"],
+.trace [data-depth="5"],
+.trace [data-depth="7"],
+.trace [data-depth="9"],
+.trace [data-depth="11"] {
+  background-color: #ffffff;
+}
+
+.trace [data-depth="2"],
+.trace [data-depth="4"],
+.trace [data-depth="6"],
+.trace [data-depth="8"],
+.trace [data-depth="10"],
+.trace [data-depth="12"] {
+  background-color: #f9f9f9;
+}

@@ -67,7 +67,9 @@
              (if-let [url (filepath->repo-url file line-num)]
                [:a {:href url :target "_blank"} loc]
                loc))]]
-         [:div (map (fn [arg] [:code.argument.muted arg]) arguments)]
+         [:ul.inline
+          (for [arg arguments]
+            [:li [:code.argument.muted arg]])]
          (if (seq sub-traces)
            (render-trace-fns sub-traces))]]])))
 
@@ -85,6 +87,7 @@
   (defblock content
     [:div.row
      [:div.span12
+      [:h1 "Trace"]
       (render-trace-fns trace)]]))
 
 ;; TODO Don't take Files
