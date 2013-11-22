@@ -4,6 +4,7 @@
              [trace :as view.trace]
              [index :as view.index]
              [layout :as view.layout]]
+            [xdebug-trace.trace :as trace]
             [xdebug-trace.reader :as reader]
             [xdebug-trace.util :refer [distinct-on]]
             [clojure.java.io :as io]
@@ -73,6 +74,14 @@
 (defn create-handler [trace-dirs]
   (routes
     (GET "/" [] (view.index/index))
+    (GET "/function-summary/:trace-name/:fn-name"
+         {{:keys [trace-name fn-name]} :params :as req}
+         (if-let [^File trace-file (find-trace trace-dirs trace-name)]
+           (let [limit (long-query-param req :limit)
+                 offset (long-query-param req :offset)
+                 max-depth (long-query-param req :max-depth)
+                 trace (read-trace trace-file limit offset max-depth)]
+             (pr-str (trace/fn-summary trace fn-name)))))
     (GET "/trace/:trace-name" {{:keys [trace-name]} :params :as req}
          (if-let [^File trace-file (find-trace trace-dirs trace-name)]
            (let [lmodified (Date. (.lastModified trace-file))]
