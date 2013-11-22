@@ -2,24 +2,38 @@
   (:require [environ.core :refer [env]]
             [clojure.string :as str]))
 
-(defn ensure-prefix
+(defn- ensure-prefixed
+  [^String s prefix]
+  (if (.startsWith s (str prefix))
+    s
+    (str prefix s)))
+
+(defn- ensure-no-prefix
   [^String s prefix]
   (let [prefix (str prefix)]
     (if (.startsWith s prefix)
-      s
-      (str prefix s))))
+      (.substring s (count prefix))
+      s)))
+
+(defn- default-repo-base-url []
+  (let [v (env :repo-base-url)]
+    (when-not (str/blank? v) v)))
+
+(defn- default-doc-root []
+  (if-let [v (env :docroot)]
+    (when-not (str/blank? v) (re-pattern v))))
 
 (defn filepath->repo-url
   ([filename]
    (filepath->repo-url filename nil))
   ([filename line-num]
-   (filepath->repo-url filename line-num (env :repo-base-url)))
+   (filepath->repo-url filename line-num (default-repo-base-url)))
   ([filename line-num base-url]
-   (filepath->repo-url filename line-num base-url (some-> (env :docroot-pattern) re-pattern)))
+   (filepath->repo-url filename line-num base-url (default-doc-root)))
   ([filename line-num base-url doc-root]
    (if (and base-url doc-root)
      (let [source-path (-> (str/replace-first filename doc-root "") (ensure-prefix \/))
-           url (str base-url source-path)]
+           url (str (ensure-no-prefix base-url \/) (ensure-prefix source-path \/))]
        (if line-num
          (str url "#L" line-num)
          url)))))
