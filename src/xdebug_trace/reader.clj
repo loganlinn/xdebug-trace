@@ -10,6 +10,20 @@
   (:import java.io.Reader))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Records
+
+(defrecord TraceNode
+  [level
+   fn-name
+   fn-num
+   time
+   memory
+   user-defined?
+   file
+   line-num
+   arguments])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Zipper Constructs
 
 (defn make-root [] [{:root true} []])
@@ -17,15 +31,16 @@
 ;; node: [value children]
 ;; children: [node ...]
 (defn line->node [line]
-  [{:level (l/level line)
-    :fn-name (l/fn-name line)
-    :fn-num (l/fn-num line)
-    :time [(l/time line)]
-    :memory [(l/memory line)]
-    :user-defined? (l/user-defined? line)
-    :file (l/file line)
-    :line-num (l/line-num line)
-    :arguments (l/arguments line)}
+  [(TraceNode.
+     (l/level line)
+     (l/fn-name line)
+     (l/fn-num line)
+     [(l/time line)]
+     [(l/memory line)]
+     (l/user-defined? line)
+     (l/file line)
+     (l/line-num line)
+     (l/arguments line))
    []])
 
 (defn exit-node [node line]
