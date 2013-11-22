@@ -1,6 +1,8 @@
 (ns xdebug-trace.view.trace
   "Renders HTML for viewing trace"
   (:require [xdebug-trace.view.layout :refer [defpage]]
+            [clj-time.coerce :as tc]
+            [clj-time.format :as tf]
             [hiccup.page :as page]))
 
 (def intial-collapse-depth 1)
@@ -84,8 +86,19 @@
   (defblock content
     [:div.row
      [:div.span12
-      (for [^java.io.File f trace-files]
-        (let [filename (.getName f)
-              trace-name (.substring filename 0 (.lastIndexOf filename "."))]
-          [:a {:href (trace-url trace-name)} trace-name]))
-      ]]))
+      [:h1 "Available Traces"]
+      [:table.table.table-hover.table-bordered
+       [:thead
+        [:tr
+         [:td "Name"]
+         [:td "Last Modified"]]]
+       [:tbody
+        (for [^java.io.File f trace-files]
+          (let [filename (.getName f)
+                trace-name (.substring filename 0 (.lastIndexOf filename "."))
+                last-modified (->> (.lastModified f)
+                                   (tc/from-long)
+                                   (tf/unparse (tf/formatters :rfc822)))]
+            [:tr
+             [:td [:a {:href (trace-url trace-name)} trace-name]]
+             [:td last-modified]]))]]]]))
