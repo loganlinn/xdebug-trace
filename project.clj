@@ -12,6 +12,5 @@
                  [clj-time "0.6.0"]]
   :profiles {:dev {:source-paths ["dev"]
                    :dependencies [[org.clojure/tools.namespace "0.2.4"]
-                                  [org.clojure/java.classpath "0.2.0"]
-                                  [midje "1.5.1"]]}}
+                                  [org.clojure/java.classpath "0.2.0"]]}}
   :resource-paths ["resources" "upload"])

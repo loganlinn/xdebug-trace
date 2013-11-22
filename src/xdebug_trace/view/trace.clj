@@ -7,7 +7,7 @@
             [hiccup.page :as page]))
 
 (def intial-collapse-depth 1)
-(def max-depth 8)
+(def default-max-depth 8)
 
 (defn time-label [[start end]]
   (if-not end
@@ -43,55 +43,58 @@
 (declare render-trace-fns)
 
 (defn render-trace-fn
-  [[{:keys [fn-name fn-num time memory file line-num depth arguments] :as trace} sub-traces]]
-  (if (< depth max-depth)
-    (let [collapse-id (str "collapse_" fn-num)]
-      [:div.accordion-group
-       {:data-depth depth}
-       [:div.accordion-heading
-        [:a.accordion-toggle
-         {:data-toggle "collapse"
-          :href (str "#" collapse-id)}
-         [:h4.fn-name fn-name
-          [:span.time-diff.badge.pull-right
-           {:class (time-class time)} (time-label time)]
-          [:span.memory-diff.badge.pull-right
-           {:class (mem-class memory)} (mem-label memory)]]]]
-       [:div.accordion-body.collapse
-        {:id collapse-id
-         :class (if (< depth intial-collapse-depth) "in")}
-        [:div.accordion-inner
-         [:div
-          [:code.location.muted
-           (let [loc (str file ":" line-num)]
-             (if-let [url (filepath->repo-url file line-num)]
-               [:a {:href url :target "_blank"} loc]
-               loc))]]
-         [:ul.inline
-          (for [arg arguments]
-            [:li [:code.argument.muted arg]])]
-         (if (seq sub-traces)
-           (render-trace-fns sub-traces))]]])))
+  [[trace sub-traces] max-depth]
+  (let [{:keys [fn-name fn-num time memory file line-num depth arguments]} trace
+        collapse-id (str "collapse_" fn-num)]
+    [:div.accordion-group
+     {:data-depth depth}
+     [:div.accordion-heading
+      [:a.accordion-toggle
+       {:data-toggle "collapse"
+        :href (str "#" collapse-id)}
+       [:h4.fn-name fn-name
+        [:span.time-diff.badge.pull-right
+         {:class (time-class time)} (time-label time)]
+        [:span.memory-diff.badge.pull-right
+         {:class (mem-class memory)} (mem-label memory)]]]]
+     [:div.accordion-body.collapse
+      {:id collapse-id
+       :class (if (< depth intial-collapse-depth) "in")}
+      [:div.accordion-inner
+       [:div
+        [:code.location.muted
+         (let [loc (str file ":" line-num)]
+           (if-let [url (filepath->repo-url file line-num)]
+             [:a {:href url :target "_blank"} loc]
+             loc))]]
+       [:ul.inline
+        (for [arg arguments]
+          [:li [:code.argument.muted arg]])]
+       (if (or (not max-depth) (< depth max-depth))
+         (render-trace-fns sub-traces max-depth))]]]))
 
-(defn render-trace-fns [trace]
-  [:div.trace.accordion (map render-trace-fn trace)])
+(defn render-trace-fns
+  [trace max-depth]
+  (when trace
+    [:div.trace.accordion
+     (for [tf trace] (render-trace-fn tf max-depth))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
 (defn trace-url [trace-name] (str "/trace/" trace-name))
 
-(defpage render-trace [trace]
+(defpage render-trace [trace & {:keys [max-depth]}]
   (defblock head-end
     (page/include-css "/css/trace.css"))
   (defblock content
     [:div.row
      [:div.span12
       [:h1 "Trace"]
-      (render-trace-fns trace)]]))
+      (render-trace-fns trace (or max-depth default-max-depth))]]))
 
 ;; TODO Don't take Files
-(defpage render-traces [trace-files]
+(defpage list-traces [trace-files]
   (defblock content
     [:div.row
      [:div.span12

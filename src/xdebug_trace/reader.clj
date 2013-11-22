@@ -89,6 +89,15 @@
         zip/root
         node-children)))
 
+(comment
+ (defn lazy-read-trace
+  [[first-line & rest-lines]]
+  (let [level (l/level first-line)
+        [now later] (split-with #(not= (l/level %) level) rest-lines)]
+    (lazy-cat
+      (read-trace (cons first-line now))
+      (lazy-read-trace (take 10 later))))))
+
 (defn trace-line-seq
   "Returns lazy sequence of lines "
   [^Reader rdr]

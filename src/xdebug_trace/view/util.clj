@@ -2,7 +2,7 @@
   (:require [environ.core :refer [env]]
             [clojure.string :as str]))
 
-(defn- ensure-prefixed
+(defn- ensure-prefix
   [^String s prefix]
   (if (.startsWith s (str prefix))
     s
