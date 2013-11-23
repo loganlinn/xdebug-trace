@@ -68,6 +68,24 @@
   (if-let [ims (some-> (headers "if-modified-since") time/parse-date)]
     (not (.before ims last-modified))))
 
+(defn view-trace-handler
+  [{{:keys [trace-name]} :params :as req} trace-dirs]
+  (if-let [^File trace-file (find-trace trace-dirs trace-name)]
+    (let [lmodified (Date. (.lastModified trace-file))]
+      (if (not-modified-since? req lmodified)
+        (-> (res/response "") (res/status 304))
+        (let [limit (long-query-param req :limit)
+              offset (long-query-param req :offset)
+              max-depth (long-query-param req :max-depth)
+              trace (read-trace trace-file limit offset max-depth)]
+          (-> (view.trace/render-trace trace :max-depth max-depth)
+              (res/response )
+              (res/header "ETag" "123123123")
+              (res/header "Last-Modified"
+                          (time/format-date lmodified))
+              (res/header "Cache-Control"
+                          "no-transform,public,max-age=60,s-maxage=60")))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
@@ -82,22 +100,7 @@
                  max-depth (long-query-param req :max-depth)
                  trace (read-trace trace-file limit offset max-depth)]
              (pr-str (trace/fn-summary trace fn-name)))))
-    (GET "/trace/:trace-name" {{:keys [trace-name]} :params :as req}
-         (if-let [^File trace-file (find-trace trace-dirs trace-name)]
-           (let [lmodified (Date. (.lastModified trace-file))]
-             (if (not-modified-since? req lmodified)
-               (-> (res/response "") (res/status 304))
-               (let [limit (long-query-param req :limit)
-                     offset (long-query-param req :offset)
-                     max-depth (long-query-param req :max-depth)
-                     trace (read-trace trace-file limit offset max-depth)]
-                 (-> (view.trace/render-trace trace :max-depth max-depth)
-                     (res/response )
-                     (res/header "ETag" "123123123")
-                     (res/header "Last-Modified"
-                                 (time/format-date lmodified))
-                     (res/header "Cache-Control"
-                                 "no-transform,public,max-age=60,s-maxage=60")))))))
+    (GET "/trace/:trace-name" req (view-trace-handler req trace-dirs))
     (GET "/trace" []
          (let [trace-files (find-traces trace-dirs)]
            (view.trace/list-traces trace-files)))))
