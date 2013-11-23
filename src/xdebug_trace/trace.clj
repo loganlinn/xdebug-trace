@@ -21,24 +21,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
-(defn fn-summary-fold
-  ([] {:time 0
-       :memory 0
-       :n 0})
-  ([m1 m2] (merge-with + m1 m2)))
-
 (defn fn-summary [trace fn-name]
-  (->>
-    (flatten trace)
-    (r/filter #(= fn-name (:fn-name %)))
-    (r/map
-      (fn [trace]
-        (-> trace
-            (select-keys [:time :memory])
-            (update-in [:time] diff)
-            (update-in [:memory] diff)
-            (assoc :n 1))))
-    (r/fold fn-summary-fold)))
+  (->> (flatten trace)
+       (r/filter #(= fn-name (:fn-name %)))
+       (r/map #(-> (select-keys % [:time :memory])
+                   (update-in [:time] diff)
+                   (update-in [:memory] diff)
+                   (assoc :n 1)))
+       (r/fold (partial merge-with +))))
 
 (defn fn-summary-serial [trace fn-name]
   (reduce
