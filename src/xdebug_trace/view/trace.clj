@@ -102,7 +102,7 @@
       [:table.table.table-hover.table-bordered
        [:thead
         [:tr
-         [:td "Name"]
+         [:td "Trace"]
          [:td "Last Modified"]]]
        [:tbody
         (for [^java.io.File f trace-files]
@@ -112,5 +112,7 @@
                                    (tc/from-long)
                                    (tf/unparse (tf/formatters :rfc822)))]
             [:tr
-             [:td [:a {:href (trace-url trace-name)} trace-name]]
+             [:td
+              [:a {:href (trace-url trace-name)} trace-name]
+              [:a.btn.btn-primary.pull-right {:href (str "/analyze/" trace-name)} "Analyze"]]
              [:td last-modified]]))]]]]))
