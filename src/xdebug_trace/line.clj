@@ -15,6 +15,7 @@
 (defn arguments [line] (drop 11 line))
 
 (def ^:private digits #{\0 \1 \2 \3 \4 \5 \6 \7 \8 \9})
+(def ^:private date-format (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ss"))
 
 (defn line? [line]
   (and (seq line) (digits (nth line 0))))
@@ -26,5 +27,5 @@
   (.startsWith ^String (nth line 0) "TRACE END"))
 
 (defn date [line]
-  (if-let [date-str (re-find #"(?<=\[)\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?=\])" (nth line 0))]
-    date-str))
+  (if-let [[_ date-str] (re-find #"^TRACE (?:START|END) \[([^\]]+)\]" (nth line 0))]
+    (.parse date-format date-str)))
