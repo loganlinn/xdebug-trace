@@ -89,8 +89,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
-(def start ::start)
-(def end ::end)
+(defn start [trace] (::start (meta trace)))
+(defn end [trace] (::end (meta trace)))
 
 (defn read-trace [lines]
   (let [root-node (make-root)
