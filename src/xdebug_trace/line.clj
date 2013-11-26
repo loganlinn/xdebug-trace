@@ -17,14 +17,14 @@
 (def ^:private digits #{\0 \1 \2 \3 \4 \5 \6 \7 \8 \9})
 
 (defn line? [line]
-  (and (seq line) (digits (ffirst line))))
+  (and (seq line) (digits (nth line 0))))
 
 (defn trace-start? [line]
-  (.startsWith ^String (first line) "TRACE START"))
+  (.startsWith ^String (nth line 0) "TRACE START"))
 
 (defn trace-end? [line]
-  (.startsWith ^String (first line) "TRACE END"))
+  (.startsWith ^String (nth line 0) "TRACE END"))
 
 (defn date [line]
-  (if-let [date-str (re-find #"(?<=\[)\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?=\])" (first line))]
+  (if-let [date-str (re-find #"(?<=\[)\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?=\])" (nth line 0))]
     date-str))
