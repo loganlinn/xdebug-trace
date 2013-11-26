@@ -64,7 +64,7 @@
 
 (defn exit-fn
   [loc line]
-  {:pre [(expected-exit? loc line)]}
+  ;{:pre [(expected-exit? loc line)]}
   (-> loc
       (zip/edit exit-node line)
       zip/up))
@@ -74,20 +74,29 @@
   If it's an entry line, we push a level to stack, otherwise collect exiting
   time/memory and pop stack."
   [loc line]
-  (cond
-    (not (l/line? line)) loc
-    (l/entry-line? line) (enter-fn loc line)
-    :else (exit-fn loc line)))
+  (if (l/line? line)
+    (cond
+      (l/entry-line? line) (enter-fn loc line)
+      (expected-exit? loc line) (exit-fn loc line)
+      :else loc)
+    (cond
+      (l/trace-start? line)
+      (with-meta loc (assoc (meta loc) ::start (l/date line)))
+      (l/trace-end? line)
+      (with-meta loc (assoc (meta loc) ::end (l/date line)))
+      :else loc)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
 (defn read-trace [lines]
   (let [root-node (make-root)
-        loc (zipper root-node)]
-    (-> (reduce accept-line loc lines)
-        zip/root
-        node-children)))
+        loc (zipper root-node)
+        trace (reduce accept-line loc lines)
+        trace-meta (meta trace)]
+    (with-meta
+      (-> trace zip/root node-children)
+      (select-keys trace-meta [::start ::end]))))
 
 (comment
  (defn lazy-read-trace
@@ -101,6 +110,4 @@
 (defn trace-line-seq
   "Returns lazy sequence of lines "
   [^Reader rdr]
-  (->> (line-seq rdr)
-       (map #(str/split % #"\t"))
-       (drop-while #(or (not (l/line? %)) (not (l/entry-line? %))))))
+  (map #(str/split % #"\t") (line-seq rdr)))
