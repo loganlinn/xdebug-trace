@@ -89,6 +89,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
+(def start ::start)
+(def end ::end)
+
 (defn read-trace [lines]
   (let [root-node (make-root)
         loc (zipper root-node)
