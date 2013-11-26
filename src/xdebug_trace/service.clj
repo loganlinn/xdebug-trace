@@ -99,10 +99,19 @@
                  offset (long-query-param req :offset)
                  max-depth (long-query-param req :max-depth)
                  trace (read-trace trace-file limit offset max-depth)]
-             (pr-str (trace/fn-summary trace fn-name)))))
+             (pr-str (time (trace/fn-summary trace fn-name))))))
     (GET "/analyze/:trace-name"
          {{:keys [trace-name]} :params :as req}
-         "HEY!")
+         (if-let [^File trace-file (find-trace trace-dirs trace-name)]
+           (let [limit (long-query-param req :limit)
+                 offset (long-query-param req :offset)
+                 max-depth (long-query-param req :max-depth)
+                 trace (read-trace trace-file limit offset max-depth)]
+             (pr-str (time
+                       ;(trace/sort-fn-traces (trace/trace-summary trace) :n)
+                       (trace/trace-summary-top-n 5 (trace/trace-summary trace))
+                       ))
+             )))
     (GET "/trace/:trace-name" req (view-trace-handler req trace-dirs))
     (GET "/trace" []
          (let [trace-files (find-traces trace-dirs)]
