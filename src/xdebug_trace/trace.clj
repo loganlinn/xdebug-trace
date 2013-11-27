@@ -1,15 +1,8 @@
 (ns xdebug-trace.trace
   "Trace information and statistics"
-  (:require [clojure.core.reducers :as r]
+  (:require [xdebug-trace.util :refer [deep-merge-with]]
+            [clojure.core.reducers :as r]
             [clojure.data.priority-map :refer [priority-map]]))
-
-(defn deep-merge-with [f & maps]
-  (apply
-    (fn m [& vs]
-      (if (every? map? vs)
-        (apply merge-with m vs)
-        (apply f vs)))
-    maps))
 
 (defn merge+
   ([] {})

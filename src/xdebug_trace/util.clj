@@ -11,3 +11,11 @@
                           (cons x (step (rest s) (conj seen xv)))))))
                   xs seen)))]
     (step coll #{})))
+
+(defn deep-merge-with [f & maps]
+  (apply
+    (fn m [& vs]
+      (if (every? map? vs)
+        (apply merge-with m vs)
+        (apply f vs)))
+    maps))
