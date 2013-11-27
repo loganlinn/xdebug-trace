@@ -115,7 +115,7 @@
                          ;(trace/sort-fn-traces (trace/trace-summary trace) :n)
                          (trace/trace-summary-top-n 5 (trace/trace-summary trace))
                          ))
-             (view.trace-summary/trace-summary top-n n)
+             (view.trace-summary/trace-summary trace-name top-n n)
              )))
     (GET "/trace/:trace-name" req (view-trace-handler req trace-dirs))
     (GET "/trace" []

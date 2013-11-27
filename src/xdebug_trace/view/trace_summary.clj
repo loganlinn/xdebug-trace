@@ -24,14 +24,15 @@
          [:td n]])
       fns)]])
 
-(defpage trace-summary [summary n]
+(defpage trace-summary [trace-name summary n]
   (defblock content
     [:div.row
      [:div.col-xs-12
-      [:h4 "Calls"]
+      [:h1 "Trace Summary"]
+      [:h3 "Calls"]
       (trace-table (:n summary))
-      [:h4 "Time"]
+      [:h3 "Time"]
       (trace-table (:time summary))
-      [:h4 "Memory"]
+      [:h3 "Memory"]
       (trace-table (:memory summary))
       ]]))
