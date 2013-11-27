@@ -19,8 +19,8 @@
         [:tr
          [:td (inc index)]
          [:td fn-name]
-         [:td (format "%+d" memory)]
-         [:td (format "%.2f ms" time)]
+         [:td (format "%,(.0f kb" (/ memory 1024.))]
+         [:td (format "%,.2f ms" time)]
          [:td n]])
       fns)]])
 
