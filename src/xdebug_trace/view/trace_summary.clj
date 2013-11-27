@@ -5,7 +5,7 @@
             [hiccup.page :as page]))
 
 (defn trace-table [fns]
-  [:table.table
+  [:table.table.table-striped.table-hover
    [:thead
     [:tr
      [:th "#"]
