@@ -4,7 +4,7 @@
 (defn level [line] (nth line 0))
 (defn fn-num [line] (some-> (nth line 1) read-string))
 (defn entry-line? [line] (= (nth line 2) "0"))
-(defn time [line] (some-> (nth line 3) read-string))
+(defn time [line] (some-> (nth line 3) read-string (* 1000)))
 (defn memory [line] (some-> (nth line 4) read-string))
 
 ;; Entry line fields

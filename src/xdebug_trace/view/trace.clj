@@ -12,12 +12,12 @@
 (defn time-label [[start end]]
   (if-not end
     "?"
-    (let [diff (* 1000 (- end start))]
+    (let [diff (- end start)]
       (format "%.2f ms" (float diff)))))
 
 (defn time-class [[start end]]
   (when end
-    (let [diff (* 1000 (- end start))]
+    (let [diff (- end start)]
       (cond
         (> diff 10.) "label-warning"
         (> diff 0.1) "label-info"
