@@ -13,5 +13,6 @@
                  [clj-time "0.6.0"]]
   :profiles {:dev {:source-paths ["dev"]
                    :dependencies [[org.clojure/tools.namespace "0.2.4"]
-                                  [org.clojure/java.classpath "0.2.0"]]}}
+                                  [org.clojure/java.classpath "0.2.0"]
+                                  [com.datomic/datomic-free "0.8.4270"]]}}
   :resource-paths ["resources" "upload"])
