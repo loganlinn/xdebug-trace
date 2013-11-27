@@ -42,6 +42,12 @@
    line-num
    arguments])
 
+(defn flatten-summary-fns
+  "Updates the :fns map (fn-name to stats) to be a sequence of maps with fn-name
+  associated inside"
+  [{fns :fns :as summary}]
+  (assoc summary :fns (map #(assoc (val %) :fn-name (key %)) fns)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
@@ -75,7 +81,8 @@
                ;; increment global & fn specific counters
                (merge+ memo
                        fn-stats
-                       {:fns {fn-name fn-stats}})))))))
+                       {:fns {fn-name fn-stats}}))))
+         (flatten-summary-fns))))
 
 (defn trace-summary-top-n [n trace-summary]
   (let [top-fn (top-n-by n)]
@@ -88,7 +95,7 @@
       {:time (priority-map)
        :memory (priority-map)
        :n (priority-map)}
-      (r/map #(assoc (val %) :fn-name (key %)) (:fns trace-summary)))))
+      (:fns trace-summary))))
 
 (defn sort-fn-traces
   "Sort functions in trace-summary by property"
