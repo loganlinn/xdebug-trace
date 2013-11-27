@@ -19,8 +19,9 @@
   (when end
     (let [diff (* 1000 (- end start))]
       (cond
-        (> diff 10.) "badge-important"
-        (> diff 0.1) "badge-info"))))
+        (> diff 10.) "label-warning"
+        (> diff 0.1) "label-info"
+        :else "label-default"))))
 
 (defn mem-label [[start end]]
   (if-not end
@@ -35,10 +36,10 @@
   (when end
     (let [diff (- end start)]
       (cond
-        (= diff 0) nil
-        (> diff 128) "badge-important"
-        (> diff 0) "badge-warning"
-        :else "badge-success"))))
+        (= diff 0) "label-default"
+        (> diff 128) "label-danger"
+        (> diff 0) "label-info"
+        :else "label-success"))))
 
 (declare render-trace-fns)
 
@@ -46,21 +47,20 @@
   [[trace sub-traces] max-depth]
   (let [{:keys [fn-name fn-num time memory file line-num depth arguments]} trace
         collapse-id (str "collapse_" fn-num)]
-    [:div.accordion-group
+    [:div.panel.panel-default
      {:data-depth depth}
-     [:div.accordion-heading
-      [:a.accordion-toggle
-       {:data-toggle "collapse"
-        :href (str "#" collapse-id)}
-       [:h4.fn-name fn-name
-        [:span.time-diff.badge.pull-right
+     [:div.panel-heading
+      [:h4.panel-title
+       [:a {:data-toggle "collapse" :href (str "#" collapse-id)}
+        [:span.time-diff.label.pull-right
          {:class (time-class time)} (time-label time)]
-        [:span.memory-diff.badge.pull-right
-         {:class (mem-class memory)} (mem-label memory)]]]]
-     [:div.accordion-body.collapse
+        [:span.memory-diff.label.pull-right
+         {:class (mem-class memory)} (mem-label memory)]
+        fn-name ]]]
+     [:div.panel-collapse.collapse
       {:id collapse-id
        :class (if (< depth intial-collapse-depth) "in")}
-      [:div.accordion-inner
+      [:div.panel-body
        [:div
         [:code.location.muted
          (let [loc (str file ":" line-num)]
