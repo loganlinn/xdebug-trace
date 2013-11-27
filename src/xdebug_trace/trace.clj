@@ -16,6 +16,24 @@
   ([m1 m2] (deep-merge-with + m1 m2))
   ([m1 m2 m3] (deep-merge-with + m1 m2 m3)))
 
+(defn top-n-by
+  "Returns a function that accepts a priority-map, a record/map, and a property,
+  and returns the prioirity map including the record/map if value of property is
+  within top-n"
+  ([n] (top-n-by compare n))
+  ([comp n]
+   (fn [pm rec prop]
+     (if-let [v (prop rec)]
+       (let [[comp-rec comp-v] (peek pm)]
+         (cond
+           (or (nil? comp-rec) (< (count pm) n))
+           (conj pm [rec v])
+
+           (< (comp comp-v v) 0)
+           (conj (pop pm) [rec v])
+
+           :else pm))
+       pm))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Records
@@ -65,22 +83,6 @@
                (merge+ memo
                        fn-stats
                        {:fns {fn-name fn-stats}})))))))
-
-(defn top-n-by
-  ([n] (top-n-by compare n))
-  ([comp n]
-   (fn [pm rec prop]
-     (if-let [v (prop rec)]
-       (let [[comp-rec comp-v] (peek pm)]
-         (cond
-           (or (nil? comp-rec) (< (count pm) n))
-           (conj pm [rec v])
-
-           (< (comp comp-v v) 0)
-           (conj (pop pm) [rec v])
-
-           :else pm))
-       pm))))
 
 (defn trace-summary-top-n [n trace-summary]
   (let [top-fn (top-n-by n)]
