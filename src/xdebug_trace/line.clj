@@ -18,7 +18,7 @@
 (def ^:private date-format (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ss"))
 
 (defn line? [line]
-  (and (seq line) (digits (nth line 0))))
+  (and (seq line) (digits (first (nth line 0)))))
 
 (defn trace-start? [line]
   (.startsWith ^String (nth line 0) "TRACE START"))
