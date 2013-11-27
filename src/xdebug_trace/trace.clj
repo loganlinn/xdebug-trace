@@ -85,17 +85,21 @@
          (flatten-summary-fns))))
 
 (defn trace-summary-top-n [n trace-summary]
-  (let [top-fn (top-n-by n)]
-    (reduce
-      (fn [stats rec]
-        (-> stats
-            (update-in [:time] top-fn rec :time)
-            (update-in [:memory] top-fn rec :memory)
-            (update-in [:n] top-fn rec :n)))
-      {:time (priority-map)
-       :memory (priority-map)
-       :n (priority-map)}
-      (:fns trace-summary))))
+  (let [top-fn (top-n-by n)
+        rev-keys (comp reverse keys)]
+    (-> (reduce
+          (fn [stats rec]
+            (-> stats
+                (update-in [:time] top-fn rec :time)
+                (update-in [:memory] top-fn rec :memory)
+                (update-in [:n] top-fn rec :n)))
+          {:time (priority-map)
+           :memory (priority-map)
+           :n (priority-map)}
+          (:fns trace-summary))
+        (update-in [:time] rev-keys)
+        (update-in [:memory] rev-keys)
+        (update-in [:n] rev-keys))))
 
 (defn sort-fn-traces
   "Sort functions in trace-summary by property"

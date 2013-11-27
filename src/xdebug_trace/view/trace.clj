@@ -97,7 +97,7 @@
 (defpage list-traces [trace-files]
   (defblock content
     [:div.row
-     [:div.span12
+     [:div.col-xs-12
       [:h1 "Available Traces"]
       [:table.table.table-hover.table-bordered
        [:thead

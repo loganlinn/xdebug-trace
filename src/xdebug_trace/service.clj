@@ -2,6 +2,7 @@
   "HTTP service"
   (:require [xdebug-trace.view
              [trace :as view.trace]
+             [trace-summary :as view.trace-summary]
              [index :as view.index]
              [layout :as view.layout]]
             [xdebug-trace.trace :as trace]
@@ -106,11 +107,15 @@
            (let [limit (long-query-param req :limit)
                  offset (long-query-param req :offset)
                  max-depth (long-query-param req :max-depth)
-                 trace (read-trace trace-file limit offset max-depth)]
-             (pr-str (time
-                       ;(trace/sort-fn-traces (trace/trace-summary trace) :n)
-                       (trace/trace-summary-top-n 5 (trace/trace-summary trace))
-                       ))
+                 n 10 ;; TODO
+                 trace (read-trace trace-file limit offset max-depth)
+                 summary (trace/trace-summary trace)
+                 top-n (trace/trace-summary-top-n n summary)]
+             #_(pr-str (time
+                         ;(trace/sort-fn-traces (trace/trace-summary trace) :n)
+                         (trace/trace-summary-top-n 5 (trace/trace-summary trace))
+                         ))
+             (view.trace-summary/trace-summary top-n n)
              )))
     (GET "/trace/:trace-name" req (view-trace-handler req trace-dirs))
     (GET "/trace" []
