@@ -59,10 +59,12 @@
 
 (defn- long-query-param
   "Extracts query param and parses as long"
-  [req param]
-  (if-let [v (get-in req [:query-params (name param)])]
-    (try (Long/parseLong v)
-         (catch RuntimeException _))))
+  ([req param] (long-query-param req param nil))
+  ([req param default]
+   (if-let [v (get-in req [:query-params (name param)])]
+     (try (Long/parseLong v)
+          (catch RuntimeException _ default))
+     default)))
 
 (defn not-modified-since?
   [{headers :headers :as req} last-modified]
@@ -107,16 +109,11 @@
            (let [limit (long-query-param req :limit)
                  offset (long-query-param req :offset)
                  max-depth (long-query-param req :max-depth)
-                 n 10 ;; TODO
+                 n (long-query-param req :n 10)
                  trace (read-trace trace-file limit offset max-depth)
                  summary (trace/trace-summary trace)
                  top-n (trace/trace-summary-top-n n summary)]
-             #_(pr-str (time
-                         ;(trace/sort-fn-traces (trace/trace-summary trace) :n)
-                         (trace/trace-summary-top-n 5 (trace/trace-summary trace))
-                         ))
-             (view.trace-summary/trace-summary trace-name top-n n)
-             )))
+             (view.trace-summary/trace-summary trace-name top-n n))))
     (GET "/trace/:trace-name" req (view-trace-handler req trace-dirs))
     (GET "/trace" []
          (let [trace-files (find-traces trace-dirs)]

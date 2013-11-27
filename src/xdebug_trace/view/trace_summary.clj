@@ -34,5 +34,4 @@
       [:h3 "Time"]
       (trace-table (:time summary))
       [:h3 "Memory"]
-      (trace-table (:memory summary))
-      ]]))
+      (trace-table (:memory summary))]]))
