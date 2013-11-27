@@ -84,6 +84,7 @@
                        {:fns {fn-name fn-stats}}))))
          (flatten-summary-fns))))
 
+;; TODO add max-level
 (defn trace-summary-top-n [n trace-summary]
   (let [top-fn (top-n-by n)
         rev-keys (comp reverse keys)]
