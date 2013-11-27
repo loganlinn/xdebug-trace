@@ -92,7 +92,7 @@
 (defn create-handler [trace-dirs]
   (routes
     (GET "/" [] (view.index/index))
-    (GET "/analyze/:trace-name/:fn-name"
+    (GET "/trace/:trace-name/summary/:fn-name"
          {{:keys [trace-name fn-name]} :params :as req}
          (if-let [^File trace-file (find-trace trace-dirs trace-name)]
            (let [limit (long-query-param req :limit)
@@ -100,7 +100,7 @@
                  max-depth (long-query-param req :max-depth)
                  trace (read-trace trace-file limit offset max-depth)]
              (pr-str (time (trace/fn-summary trace fn-name))))))
-    (GET "/analyze/:trace-name"
+    (GET "/trace/:trace-name/summary"
          {{:keys [trace-name]} :params :as req}
          (if-let [^File trace-file (find-trace trace-dirs trace-name)]
            (let [limit (long-query-param req :limit)
