@@ -4,7 +4,7 @@
             [clojure.core.reducers :as r]
             [clojure.data.priority-map :refer [priority-map]]))
 
-(defn merge+
+(defn- merge+
   ([] {})
   ([m1 m2] (deep-merge-with + m1 m2))
   ([m1 m2 m3] (deep-merge-with + m1 m2 m3)))
