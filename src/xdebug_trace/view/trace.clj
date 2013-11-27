@@ -10,10 +10,8 @@
 (def default-max-depth 8)
 
 (defn time-label [[start end]]
-  (if-not end
-    "?"
-    (let [diff (- end start)]
-      (format "%.2f ms" (float diff)))))
+  (if-not end "?"
+    (format "%.2f ms" (- end start))))
 
 (defn time-class [[start end]]
   (when end
@@ -24,13 +22,8 @@
         :else "label-default"))))
 
 (defn mem-label [[start end]]
-  (if-not end
-    "?"
-    (let [diff (- end start)]
-      (cond
-        (= end start) "0"
-        (> diff 0) (str "+" diff)
-        :else diff))))
+  (if-not end "?"
+    (format "%+,d" (- end start))))
 
 (defn mem-class [[start end]]
   (when end
