@@ -24,6 +24,9 @@
          [:td n]])
       fns)]])
 
+(defn n-select [n]
+  )
+
 (defpage trace-summary [trace-name summary n]
   (defblock content
     [:div.row

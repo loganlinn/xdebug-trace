@@ -81,7 +81,7 @@
               offset (long-query-param req :offset)
               max-depth (long-query-param req :max-depth)
               trace (read-trace trace-file limit offset max-depth)]
-          (-> (view.trace/render-trace trace :max-depth max-depth)
+          (-> (view.trace/render-trace trace-name trace :max-depth max-depth)
               (res/response )
               (res/header "ETag" "123123123")
               (res/header "Last-Modified"

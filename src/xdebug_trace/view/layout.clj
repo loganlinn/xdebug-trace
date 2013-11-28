@@ -41,6 +41,19 @@
           (page/include-css "/css/bootstrap.min.css")
           ~@(:head-end blocks)]
          [:body
+          [:nav.navbar.navbar-default
+           {:role "navigation"}
+           [:div.navbar-header
+            [:button.navbar-toggle
+             {:type "button"
+              :data-toggle "collapse"
+              :data-target "#navbar-collapse"}
+             [:span.sr-only "Toggle navigation"]
+             [:span.icon-bar][:span.icon-bar][:span.icon-bar]]
+            [:a.navbar-brand {:href "/"} "Xdebug Trace"]]
+           [:div#navbar-collapse.collapse.navbar-collapse
+            [:ul.nav.navbar-nav
+             [:li [:a {:href "/trace"} "Traces"]]]] ]
           [:div.container
            ~@(:content blocks)]
           (page/include-js "http://code.jquery.com/jquery.js"

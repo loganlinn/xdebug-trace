@@ -76,13 +76,16 @@
 ;; Public
 
 (defn trace-url [trace-name] (str "/trace/" trace-name))
+(defn trace-summary-url [trace-name] (str "/trace/" trace-name "/summary"))
 
-(defpage render-trace [trace & {:keys [max-depth]}]
+(defpage render-trace [trace-name trace & {:keys [max-depth]}]
   (defblock head-end
     (page/include-css "/css/trace.css"))
   (defblock content
     [:div.row
      [:div.span12
+      [:a.btn.btn-primary.pull-right
+       {:href (trace-summary-url trace-name)} "Trace Summary"]
       [:h1 "Trace"]
       (render-trace-fns trace (or max-depth default-max-depth))]]))
 
