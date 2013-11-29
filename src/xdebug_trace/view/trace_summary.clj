@@ -1,5 +1,6 @@
 (ns xdebug-trace.view.trace-summary
   (:require [xdebug-trace.view.layout :refer [defpage]]
+            [xdebug-trace.view.util :refer [merged-query-str]]
             [clj-time.coerce :as tc]
             [clj-time.format :as tf]
             [hiccup.page :as page]))
@@ -24,13 +25,25 @@
          [:td n]])
       fns)]])
 
-(defn n-select [n]
-  )
+(defn n-menu [current-n]
+  [:div.btn-group
+   [:button.btn.btn-default.dropdown-toggle
+    {:type "button"
+     :data-toggle "dropdown"}
+    "Result Size " [:span.caret]]
+   [:ul.dropdown-menu
+    (for [n [5 10 25 50]
+          :let [current? (= n current-n)]]
+      [:li
+       {:class (if current? "active")}
+       [:a {:href (str "?" (merged-query-str {:n n}))} n]])]])
+
 
 (defpage trace-summary [trace-name summary n]
   (defblock content
     [:div.row
      [:div.col-xs-12
+      [:div.pull-right (n-menu n)]
       [:h1 "Trace Summary"]
       [:h3 "Calls"]
       (trace-table (:n summary))

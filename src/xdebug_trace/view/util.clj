@@ -1,5 +1,7 @@
 (ns xdebug-trace.view.util
-  (:require [environ.core :refer [env]]
+  (:require [xdebug-trace.view.layout :as layout]
+            [xdebug-trace.util :refer [query-str]]
+            [environ.core :refer [env]]
             [clojure.string :as str]))
 
 (defn- ensure-prefix
@@ -37,3 +39,11 @@
        (if line-num
          (str url "#L" line-num)
          url)))))
+
+(defn- stringify-keys [m]
+  (into {} (for [[k v] m] [(name k) v])))
+
+(defn merged-query-str [m]
+  (-> (:query-params layout/*request*)
+      (merge (stringify-keys m))
+      query-str))

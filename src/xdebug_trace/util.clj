@@ -1,4 +1,6 @@
-(ns xdebug-trace.util)
+(ns xdebug-trace.util
+  (:require [ring.util.codec :refer [url-encode]]
+            [clojure.string :as str]))
 
 (defn distinct-on [f coll]
   (let [step (fn step [xs seen]
@@ -19,3 +21,7 @@
         (apply merge-with m vs)
         (apply f vs)))
     maps))
+
+(defn query-str [m]
+  (str/join "&" (for [[k v] m]
+                  (str (url-encode k) "=" (url-encode v)))))
