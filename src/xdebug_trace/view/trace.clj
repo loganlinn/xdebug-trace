@@ -23,7 +23,7 @@
 
 (defn mem-label [[start end]]
   (if-not end "?"
-    (format "%+,d" (- end start))))
+    (format "%+,d bytes" (- end start))))
 
 (defn mem-class [[start end]]
   (when end
