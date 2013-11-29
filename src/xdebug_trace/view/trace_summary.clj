@@ -5,6 +5,8 @@
             [clj-time.format :as tf]
             [hiccup.page :as page]))
 
+(def result-size-options [5 10 25 50])
+
 (defn trace-table [fns]
   [:table.table.table-striped.table-hover
    [:thead
@@ -32,10 +34,9 @@
      :data-toggle "dropdown"}
     "Result Size " [:span.caret]]
    [:ul.dropdown-menu
-    (for [n [5 10 25 50]
-          :let [current? (= n current-n)]]
+    (for [n result-size-options]
       [:li
-       {:class (if current? "active")}
+       {:class (if (= n current-n) "active")}
        [:a {:href (str "?" (merged-query-str {:n n}))} n]])]])
 
 

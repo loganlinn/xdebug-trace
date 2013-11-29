@@ -110,5 +110,5 @@
             [:tr
              [:td
               [:a {:href (trace-url trace-name)} trace-name]
-              [:a.btn.btn-primary.pull-right {:href (str "/analyze/" trace-name)} "Analyze"]]
+              [:a.btn.btn-primary.pull-right {:href (trace-summary-url trace-name)} "Analyze"]]
              [:td last-modified]]))]]]]))
