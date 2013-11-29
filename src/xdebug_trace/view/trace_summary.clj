@@ -1,5 +1,6 @@
 (ns xdebug-trace.view.trace-summary
   (:require [xdebug-trace.view.layout :refer [defpage]]
+            [xdebug-trace.view.trace :refer [trace-nav]]
             [xdebug-trace.view.util :refer [merged-query-str]]
             [clj-time.coerce :as tc]
             [clj-time.format :as tf]
@@ -32,20 +33,21 @@
    [:button.btn.btn-default.dropdown-toggle
     {:type "button"
      :data-toggle "dropdown"}
-    "Result Size " [:span.caret]]
+    (str "Show Results: " current-n " ") [:span.caret]]
    [:ul.dropdown-menu
     (for [n result-size-options]
       [:li
        {:class (if (= n current-n) "active")}
        [:a {:href (str "?" (merged-query-str {:n n}))} n]])]])
 
-
 (defpage trace-summary [trace-name summary n]
+  (defblock head-end
+    (page/include-css "/css/trace.css"))
   (defblock content
     [:div.row
      [:div.col-xs-12
-      [:div.pull-right (n-menu n)]
-      [:h1 "Trace Summary"]
+      (trace-nav trace-name :summary)
+      [:div.row [:div.col-xs-12 (n-menu n)]]
       [:h3 "Calls"]
       (trace-table (:n summary))
       [:h3 "Time"]

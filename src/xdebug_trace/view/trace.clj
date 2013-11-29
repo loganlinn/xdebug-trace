@@ -78,15 +78,23 @@
 (defn trace-url [trace-name] (str "/trace/" trace-name))
 (defn trace-summary-url [trace-name] (str "/trace/" trace-name "/summary"))
 
+(defn trace-nav
+  ([trace-name] (trace-nav trace-name nil))
+  ([trace-name current]
+   (let [tabs {:view ["View" (trace-url trace-name)]
+               :summary ["Summary" (trace-summary-url trace-name)]}]
+     [:ul.nav.nav-tabs.trace-nav
+      (for [[tab [label url]] tabs]
+        [:li {:class (if (= current tab) "active")}
+         [:a {:href url} label]])])))
+
 (defpage render-trace [trace-name trace & {:keys [max-depth]}]
   (defblock head-end
     (page/include-css "/css/trace.css"))
   (defblock content
     [:div.row
      [:div.span12
-      [:a.btn.btn-primary.pull-right
-       {:href (trace-summary-url trace-name)} "Trace Summary"]
-      [:h1 "Trace"]
+      (trace-nav trace-name :view)
       (render-trace-fns trace (or max-depth default-max-depth))]]))
 
 ;; TODO Don't take Files
@@ -99,6 +107,7 @@
        [:thead
         [:tr
          [:td "Trace"]
+         [:td "Actions"]
          [:td "Last Modified"]]]
        [:tbody
         (for [^java.io.File f trace-files]
@@ -106,9 +115,13 @@
                 trace-name (.substring filename 0 (.lastIndexOf filename "."))
                 last-modified (->> (.lastModified f)
                                    (tc/from-long)
-                                   (tf/unparse (tf/formatters :rfc822)))]
+                                   (tf/unparse (tf/formatters :rfc822)))
+                view-url (trace-url trace-name)
+                summary-url (trace-summary-url trace-name)]
             [:tr
+             [:td [:a {:href view-url} trace-name]]
              [:td
-              [:a {:href (trace-url trace-name)} trace-name]
-              [:a.btn.btn-primary.pull-right {:href (trace-summary-url trace-name)} "Analyze"]]
+              [:div.btn-group
+               [:a.btn.btn-default {:href view-url} "View"]
+               [:a.btn.btn-default {:href summary-url} "Summary"]]]
              [:td last-modified]]))]]]]))
