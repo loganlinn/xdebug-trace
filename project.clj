@@ -15,5 +15,5 @@
                    :dependencies [[org.clojure/tools.namespace "0.2.4"]
                                   [org.clojure/java.classpath "0.2.0"]]}
              :uberjar {:main xdebug-trace.main
-                       :aot :all}}
+                       :aot [xdebug-trace.main]}}
   :resource-paths ["resources" "upload"])

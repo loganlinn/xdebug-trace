@@ -11,7 +11,8 @@
   {:server nil
    :port (Integer/parseInt (:port env "8080"))
    :trace-path (or (env :trace-path)
-                   (.getPath (io/resource "traces/")))})
+                   (if-let [traces-dir (io/resource "traces/")]
+                     (.getPath traces-dir)))})
 
 (defn start [{:keys [port trace-path] :as system}]
   (assoc system :server
