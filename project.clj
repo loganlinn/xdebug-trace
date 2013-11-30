@@ -15,5 +15,6 @@
                    :dependencies [[org.clojure/tools.namespace "0.2.4"]
                                   [org.clojure/java.classpath "0.2.0"]]}
              :uberjar {:main xdebug-trace.main
-                       :aot [xdebug-trace.main]}}
+                       :aot [xdebug-trace.main]}
+             :jdk6 {:dependencies [[org.codehaus.jsr166-mirror/jsr166y "1.7.0"]]}}
   :resource-paths ["resources" "upload"])
