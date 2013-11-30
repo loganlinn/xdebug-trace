@@ -1,5 +1,5 @@
 (ns xdebug-trace.main
-  (:gen-class :main :true)
+  (:gen-class)
   (:require [xdebug-trace.system :as system]))
 
 (defn -main
