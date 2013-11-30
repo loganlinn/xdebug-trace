@@ -11,8 +11,9 @@
                  [compojure "1.1.6"]
                  [hiccup "1.0.4"]
                  [clj-time "0.6.0"]]
-  :main xdebug-trace.main
   :profiles {:dev {:source-paths ["dev"]
                    :dependencies [[org.clojure/tools.namespace "0.2.4"]
-                                  [org.clojure/java.classpath "0.2.0"]]}}
+                                  [org.clojure/java.classpath "0.2.0"]]}
+             :uberjar {:main xdebug-trace.main
+                       :aot :all}}
   :resource-paths ["resources" "upload"])
