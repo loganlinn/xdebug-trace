@@ -5,4 +5,4 @@
 (defn -main
   [& args]
   (-> (system/system)
-      (system/start))
+      (system/start)))
