@@ -20,4 +20,4 @@
              :jdk6 {:dependencies [[org.codehaus.jsr166-mirror/jsr166y "1.7.0"]]}}
   :resource-paths ["resources" "upload"]
   :daemon {:server {:ns xdebug-trace.main
-                    :pidfile "xdebug-trace-jetty.pid"}})
+                    :pidfile "xdebug-trace-server.pid"}})
