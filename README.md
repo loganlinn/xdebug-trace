@@ -33,7 +33,7 @@ export TRACE_PATH=/var/log/php
 # Supports multiple paths
 export TRACE_PATH=/tmp:$TRACE_PATH
 
-# Linkify file names to a repo URL
+# Linkify file names to a repo URL (optional)
 # e.g., '/var/www/example-php-app/index.php' ~> 'https://github.com/loganlinn/example-php-app/blog/master/index.php'
 export REPO_BASE_URL=https://github.com/loganlinn/example-php-app/blog/master
 export DOCROOT=/var/www/example-php-app
