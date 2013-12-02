@@ -50,7 +50,7 @@ xdebug-trace utilizes [clojure.core.reducers](http://clojure.org/reducers),
 which requires
 [jsr166y.jar](http://gee.cs.oswego.edu/dl/concurrency-interest/) when
 using Java 6. I've added a `java6` profile to `project.clj` to help with
-including that dependency: `lein with-profile +java6 run -m xdebug-trace.main`
+including that dependency: `lein with-profile +java6 trampoline run -m xdebug-trace.main`
 
 ## License
 
