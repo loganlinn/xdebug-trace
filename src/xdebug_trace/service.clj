@@ -1,13 +1,14 @@
 (ns xdebug-trace.service
   "HTTP service"
-  (:require [xdebug-trace.view
+  (:require [xdebug-trace
+             [trace :as trace]
+             [reader :as reader]
+             [file :as file]]
+            [xdebug-trace.view
              [trace :as view.trace]
              [trace-summary :as view.trace-summary]
              [index :as view.index]
              [layout :as view.layout]]
-            [xdebug-trace.trace :as trace]
-            [xdebug-trace.reader :as reader]
-            [xdebug-trace.util :refer [distinct-on]]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.pprint :refer [pprint]]
@@ -19,37 +20,10 @@
             [compojure.route :as route]
             [compojure.handler]
             [environ.core :refer [env]])
-  (:import [java.io File FileFilter]
+  (:import [java.io File]
            [java.util Date]))
 
-(def trace-ext ".xt")
-
-(defn ^FileFilter trace-files-filter []
-  (reify FileFilter
-    (accept [_ f]
-      (.endsWith (.getName f) trace-ext))))
-
-(defn ^FileFilter trace-file-filter [trace-name]
-  (reify FileFilter
-    (accept [_ f]
-      (= (.getName f) (str trace-name trace-ext)))))
-
-(defn find-traces
-  "Returns sequence of all available trace files"
-  [trace-dirs]
-  (let [file-filter (trace-files-filter)]
-    (->> trace-dirs
-         (mapcat (fn [^File dir] (.listFiles dir file-filter)))
-         (distinct-on (fn [^File f] (.getName f))))))
-
-(defn find-trace [trace-dirs trace-name]
-  (let [file-filter (trace-file-filter trace-name)]
-    (some (fn [^File dir]
-            (first (.listFiles dir file-filter)))
-          trace-dirs)))
-
 (defn read-trace [^File file limit offset max-depth]
-  []
   (with-open [rdr (io/reader file)]
     (cond->> (reader/trace-line-seq rdr)
       offset (drop offset)
@@ -73,7 +47,7 @@
 
 (defn view-trace-handler
   [{{:keys [trace-name]} :params :as req} trace-dirs]
-  (if-let [^File trace-file (find-trace trace-dirs trace-name)]
+  (if-let [^File trace-file (file/find-trace trace-dirs trace-name)]
     (let [lmodified (Date. (.lastModified trace-file))]
       (if (not-modified-since? req lmodified)
         (-> (res/response "") (res/status 304))
@@ -97,7 +71,7 @@
     (GET "/" [] (view.index/index))
     (GET "/trace/:trace-name/summary/:fn-name"
          {{:keys [trace-name fn-name]} :params :as req}
-         (if-let [^File trace-file (find-trace trace-dirs trace-name)]
+         (if-let [^File trace-file (file/find-trace trace-dirs trace-name)]
            (let [limit (long-query-param req :limit)
                  offset (long-query-param req :offset)
                  max-depth (long-query-param req :max-depth)
@@ -105,7 +79,7 @@
              (pr-str (time (trace/fn-summary trace fn-name))))))
     (GET "/trace/:trace-name/summary"
          {{:keys [trace-name]} :params :as req}
-         (if-let [^File trace-file (find-trace trace-dirs trace-name)]
+         (if-let [^File trace-file (file/find-trace trace-dirs trace-name)]
            (let [limit (long-query-param req :limit)
                  offset (long-query-param req :offset)
                  max-depth (long-query-param req :max-depth)
@@ -116,7 +90,7 @@
              (view.trace-summary/trace-summary trace-name top-n n))))
     (GET "/trace/:trace-name" req (view-trace-handler req trace-dirs))
     (GET "/trace" []
-         (let [trace-files (find-traces trace-dirs)]
+         (let [trace-files (file/find-traces trace-dirs)]
            (view.trace/list-traces trace-files)))))
 
 (defn create-app [trace-path]
