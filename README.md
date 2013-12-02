@@ -25,7 +25,7 @@ Java system properties or a `.lein-env` could be used as well.
 
 ```bash
 # Jetty Port
-PORT=8080
+export PORT=8080
 
 # Directory where trace files are generated/located
 export TRACE_PATH=/var/log/php
