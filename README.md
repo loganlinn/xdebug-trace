@@ -29,8 +29,7 @@ PORT=8080
 
 # Directory where trace files are generated/located
 export TRACE_PATH=/var/log/php
-
-# Supports multiple paths
+# Supports multiple directories
 export TRACE_PATH=/tmp:$TRACE_PATH
 
 # Linkify file names to a repo URL (optional)
