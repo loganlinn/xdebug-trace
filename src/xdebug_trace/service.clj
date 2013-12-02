@@ -40,7 +40,7 @@
           (catch RuntimeException _ default))
      default)))
 
-(defn not-modified-since?
+(defn- not-modified-since?
   [{headers :headers :as req} last-modified]
   (if-let [ims (some-> (headers "if-modified-since") time/parse-date)]
     (not (.before ims last-modified))))
