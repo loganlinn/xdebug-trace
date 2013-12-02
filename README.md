@@ -17,11 +17,40 @@ Or directly in a `php.ini` file:
 xdebug.trace_format=1
 ```
 
-**Work in Progress**
-
 ## Usage
 
-Check back later!
+xdebug-trace uses [environ](https://github.com/weavejester/environ) to access
+configuration values. The following examples use environment variables, but
+Java system properties or a `.lein-env` could be used as well.
+
+```bash
+# Jetty Port
+PORT=8080
+
+# Directory where trace files are generated/located
+export TRACE_PATH=/var/log/php
+
+# Supports multiple paths
+export TRACE_PATH=/tmp:$TRACE_PATH
+
+# Linkify file names to a repo URL
+# e.g., '/var/www/example-php-app/index.php' ~> 'https://github.com/loganlinn/example-php-app/blog/master/index.php'
+export REPO_BASE_URL=https://github.com/loganlinn/example-php-app/blog/master
+export DOCROOT=/var/www/example-php-app
+
+# Execute
+lein trampoline run -m xdebug-trace.main
+```
+
+You should now be able to access `http://localhost:8080/` in a browser.
+
+### Dependencies
+
+xdebug-trace utilizes [clojure.core.reducers](http://clojure.org/reducers),
+which requires
+[jsr166y.jar](http://gee.cs.oswego.edu/dl/concurrency-interest/) when
+using Java 6. I've added a `java6` profile to `project.clj` to help with
+including that dependency: `lein with-profile +java6 run -m xdebug-trace.main`
 
 ## License
 
