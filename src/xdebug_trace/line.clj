@@ -27,5 +27,5 @@
   (.startsWith ^String (nth line 0) "TRACE END"))
 
 (defn date [line]
-  (if-let [[_ date-str] (re-find #"^TRACE (?:START|END) \[([^\]]+)\]" (nth line 0))]
+  (if-let [[_ date-str] (re-find #"^TRACE (?:START|END)[^\[]+\[([^\]]+)\]" (nth line 0))]
     (.parse date-format date-str)))
