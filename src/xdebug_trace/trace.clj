@@ -12,7 +12,7 @@
 (defn top-n-by
   "Returns a function that accepts a priority-map, a record/map, and a property,
   and returns the prioirity map including the record/map if value of property is
-  within top-n"
+  within top-n. Returned function is meant to be suitable for reduce"
   ([n] (top-n-by compare n))
   ([comp n]
    (fn [pm rec prop]
