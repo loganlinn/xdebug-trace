@@ -94,10 +94,10 @@
     (cond
       (l/trace-start? line)
       (-> (topmost loc)
-          (node-assoc :start (l/date line)))
+          (node-assoc :start (.getTime (l/date line))))
       (l/trace-end? line)
       (-> (topmost loc)
-          (node-assoc :end (l/date line)))
+          (node-assoc :end (.getTime (l/date line))))
       :else loc)))
 
 (defn- create-trace [file root-node]
