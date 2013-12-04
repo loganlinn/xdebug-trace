@@ -1,6 +1,6 @@
 (ns xdebug-trace.view.trace-summary
   (:require [xdebug-trace.view.layout :refer [defpage]]
-            [xdebug-trace.view.trace :refer [trace-nav]]
+            [xdebug-trace.view.trace :refer [trace-nav trace-header]]
             [xdebug-trace.view.util :refer [merged-query-str]]
             [clj-time.coerce :as tc]
             [clj-time.format :as tf]
@@ -40,13 +40,14 @@
        {:class (if (= n current-n) "active")}
        [:a {:href (str "?" (merged-query-str {:n n}))} n]])]])
 
-(defpage trace-summary [trace-name summary n]
+(defpage trace-summary [trace summary n]
   (defblock head-end
     (page/include-css "/css/trace.css"))
   (defblock content
     [:div.row
      [:div.col-xs-12
-      (trace-nav trace-name :summary)
+      (trace-header trace)
+      (trace-nav trace :summary)
       [:div.row [:div.col-xs-12 (n-menu n)]]
       [:h3 "Calls"]
       (trace-table (:n summary))

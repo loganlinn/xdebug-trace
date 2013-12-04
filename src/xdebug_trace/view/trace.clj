@@ -91,8 +91,9 @@
 
 (defn trace-header [trace]
   [:div
-   [:h4 "Start: " (str (first (:time trace)))]
-   [:h4 "End: " (str (second (:time trace)))]])
+   [:h3 (trace/trace-name trace)]
+   (if-let [dur (trace/time-delta trace)]
+     [:h4 (format "Total Time %,d ms" dur)])])
 
 (defpage render-trace [trace {:keys [max-depth]}]
   (defblock head-end
