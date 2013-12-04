@@ -8,7 +8,7 @@
             [clojure.zip :as zip]
             [clojure.string :as str]
             [clojure.java.io :as io])
-  (:import java.io.Reader))
+  (:import [java.io Reader File]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Zipper Constructs
@@ -44,6 +44,8 @@
 (defn zipper
   ([] (zipper (make-root)))
   ([root] (zip/zipper (constantly true) node-children make-node root)))
+
+(defn unzip [loc] (zip/root loc))
 
 (defn node-assoc [loc k v]
   (zip/edit loc assoc-in [0 k] v))
@@ -98,15 +100,19 @@
           (node-assoc :end (l/date line)))
       :else loc)))
 
+(defn- create-trace [file root-node]
+  (let [root (node-value root-node)
+        stack (node-children root-node)]
+    (trace/map->Trace {:time [(:start root) (:end root)]
+                       :stack stack
+                       :file file})))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
-(defn read-trace [lines]
-  (let [root-node (make-root)
-        loc (zipper root-node)
-        [root stack] (-> (reduce accept-line loc lines) zip/root)]
-    (trace/map->Trace {:time [(:start root) (:end root)]
-                       :stack stack})))
+(defn read-trace-lines [lines]
+  (let [build-trace #(reduce accept-line % lines)]
+    (-> (zipper) (build-trace) (unzip))))
 
 (comment
  (defn lazy-read-trace
@@ -121,3 +127,14 @@
   "Returns lazy sequence of lines "
   [^Reader rdr]
   (map #(str/split % #"\t") (line-seq rdr)))
+
+(defn read-trace-file
+  ([^File file] (read-trace-file file nil nil nil))
+  ([^File file limit offset max-depth]
+   (with-open [rdr (io/reader file)]
+     (cond->> (trace-line-seq rdr)
+       offset (drop offset)
+       limit  (take limit)
+       ;; TODO max-depth
+       true   (read-trace-lines)
+       true   (create-trace file)))))

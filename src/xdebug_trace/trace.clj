@@ -31,7 +31,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Records
 
-(defrecord Trace [time stack name])
+(defrecord Trace [time stack file])
 
 (defrecord TraceFunction
   [fn-name

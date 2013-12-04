@@ -23,14 +23,6 @@
   (:import [java.io File]
            [java.util Date]))
 
-(defn read-trace [^File file limit offset max-depth]
-  (with-open [rdr (io/reader file)]
-    (cond->> (reader/trace-line-seq rdr)
-      offset (drop offset)
-      limit  (take limit)
-      ;; TODO max-depth
-      true   (reader/read-trace))))
-
 (defn- long-query-param
   "Extracts query param and parses as long"
   ([req param] (long-query-param req param nil))
@@ -54,7 +46,7 @@
         (let [limit (long-query-param req :limit)
               offset (long-query-param req :offset)
               max-depth (long-query-param req :max-depth)
-              trace (read-trace trace-file limit offset max-depth)]
+              trace (reader/read-trace-file trace-file limit offset max-depth)]
           (-> (view.trace/render-trace trace-name trace {:max-depth max-depth})
               (res/response )
               (res/header "ETag" "123123123")
@@ -75,7 +67,7 @@
            (let [limit (long-query-param req :limit)
                  offset (long-query-param req :offset)
                  max-depth (long-query-param req :max-depth)
-                 trace (read-trace trace-file limit offset max-depth)]
+                 trace (reader/read-trace-file trace-file limit offset max-depth)]
              (pr-str (time (trace/fn-summary trace fn-name))))))
     (GET "/trace/:trace-name/summary"
          {{:keys [trace-name]} :params :as req}
@@ -84,7 +76,7 @@
                  offset (long-query-param req :offset)
                  max-depth (long-query-param req :max-depth)
                  n (long-query-param req :n 10)
-                 trace (read-trace trace-file limit offset max-depth)
+                 trace (reader/read-trace-file trace-file limit offset max-depth)
                  summary (trace/trace-summary trace)
                  top-n (trace/trace-summary-top-n n summary)]
              (view.trace-summary/trace-summary trace-name top-n n))))
