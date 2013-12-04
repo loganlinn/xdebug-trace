@@ -14,15 +14,15 @@
   and returns the prioirity map including the record/map if value of property is
   within top-n. Returned function is meant to be suitable for reduce"
   ([n] (top-n-by compare n))
-  ([comp n]
+  ([cmp n]
    (fn [pm rec prop]
      (if-let [v (prop rec)]
-       (let [[comp-rec comp-v] (peek pm)]
+       (let [[cmp-rec cmp-v] (peek pm)]
          (cond
-           (or (nil? comp-rec) (< (count pm) n))
+           (or (nil? cmp-rec) (< (count pm) n))
            (conj pm [rec v])
 
-           (< (comp comp-v v) 0)
+           (< (cmp cmp-v v) 0)
            (conj (pop pm) [rec v])
 
            :else pm))
