@@ -45,11 +45,21 @@
   ([] (zipper (make-root)))
   ([root] (zip/zipper (constantly true) node-children make-node root)))
 
+(defn node-assoc [loc k v]
+  (zip/edit loc assoc-in [0 k] v))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Zipper Operations
 
-(defn assoc-depth [loc depth]
-  (zip/edit loc assoc-in [0 :depth] depth))
+(defn topmost
+  "Returns loc of topmost (root) node"
+  [loc]
+  (if (zip/end? loc)
+    loc
+    (let [p (zip/up loc)]
+      (if p
+        (recur p)
+        loc))))
 
 (defn enter-fn [loc line]
   (let [depth (-> loc zip/node node-value (:depth 0))]
@@ -57,7 +67,7 @@
         (zip/append-child (line->node line))
         zip/down
         zip/rightmost
-        (assoc-depth (inc depth)))))
+        (node-assoc :depth (inc depth)))))
 
 (defn expected-exit? [loc line]
   (= (-> loc zip/node node-value :fn-num) (l/fn-num line)))
@@ -81,25 +91,22 @@
       :else loc)
     (cond
       (l/trace-start? line)
-      (with-meta loc (assoc (meta loc) ::start (l/date line)))
+      (-> (topmost loc)
+          (node-assoc :start (l/date line)))
       (l/trace-end? line)
-      (with-meta loc (assoc (meta loc) ::end (l/date line)))
+      (-> (topmost loc)
+          (node-assoc :end (l/date line)))
       :else loc)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
-(defn start [trace] (::start (meta trace)))
-(defn end [trace] (::end (meta trace)))
-
 (defn read-trace [lines]
   (let [root-node (make-root)
         loc (zipper root-node)
-        trace (reduce accept-line loc lines)
-        trace-meta (meta trace)]
-    (with-meta
-      (-> trace zip/root node-children)
-      (select-keys trace-meta [::start ::end]))))
+        [root stack] (-> (reduce accept-line loc lines) zip/root)]
+    (trace/map->Trace {:time [(:start root) (:end root)]
+                       :stack stack})))
 
 (comment
  (defn lazy-read-trace

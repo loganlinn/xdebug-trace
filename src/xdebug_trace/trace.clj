@@ -31,6 +31,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Records
 
+(defrecord Trace [time stack name])
+
 (defrecord TraceFunction
   [fn-name
    fn-num
@@ -49,6 +51,13 @@
   (assoc summary :fns (map #(assoc (val %) :fn-name (key %)) fns)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Protocols
+
+;; TODO
+;(defprotocol TimedEvent
+  ;(duration [this]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
 (defn delta
@@ -61,7 +70,8 @@
   (when end (- end start)))
 
 (defn fn-summary [trace fn-name]
-  (->> (flatten trace)
+  (->> (:stack trace)
+       (flatten)
        (r/filter #(= fn-name (:fn-name %)))
        (r/map #(-> (select-keys % [:time :memory])
                    (update-in [:time] delta)
@@ -71,7 +81,8 @@
 
 (defn trace-summary [trace]
   (let [inc* (fnil inc 0)]
-    (->> (flatten trace)
+    (->> (:stack trace)
+         (flatten)
          (r/fold
            merge+
            (fn [memo {:keys [fn-name time memory]}]

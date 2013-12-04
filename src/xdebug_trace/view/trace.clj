@@ -34,7 +34,7 @@
         (> diff 0) "label-info"
         :else "label-success"))))
 
-(declare render-trace-fns)
+(declare render-trace-stack)
 
 (defn render-trace-fn
   [[trace sub-traces] max-depth]
@@ -64,9 +64,9 @@
         (for [arg arguments]
           [:li [:code.argument.muted arg]])]
        (if (or (not max-depth) (< depth max-depth))
-         (render-trace-fns sub-traces max-depth))]]]))
+         (render-trace-stack sub-traces max-depth))]]]))
 
-(defn render-trace-fns
+(defn render-trace-stack
   [trace max-depth]
   (when trace
     [:div.trace.accordion
@@ -88,14 +88,20 @@
         [:li {:class (if (= current tab) "active")}
          [:a {:href url} label]])])))
 
-(defpage render-trace [trace-name trace & {:keys [max-depth]}]
+(defn trace-header [trace]
+  [:div
+   [:h4 "Start: " (str (first (:time trace)))]
+   [:h4 "End: " (str (second (:time trace)))]])
+
+(defpage render-trace [trace-name trace {:keys [max-depth]}]
   (defblock head-end
     (page/include-css "/css/trace.css"))
   (defblock content
     [:div.row
      [:div.span12
+      (trace-header trace)
       (trace-nav trace-name :view)
-      (render-trace-fns trace (or max-depth default-max-depth))]]))
+      (render-trace-stack (:stack trace) (or max-depth default-max-depth))]]))
 
 ;; TODO Don't take Files
 (defpage list-traces [trace-files]
