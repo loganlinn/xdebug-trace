@@ -2,7 +2,8 @@
   "Trace information and statistics"
   (:require [xdebug-trace.util :refer [deep-merge-with]]
             [clojure.core.reducers :as r]
-            [clojure.data.priority-map :refer [priority-map]]))
+            [clojure.data.priority-map :refer [priority-map]])
+  (:import [java.io File]))
 
 (defn- merge+
   ([] {})
@@ -57,8 +58,12 @@
 ;(defprotocol TimedEvent
   ;(duration [this]))
 
+(defprotocol NamedTrace (trace-name [this]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
+
+(def trace-ext ".xt")
 
 (defn delta
   [[start end]] (if end (- end start) 0))
@@ -118,3 +123,19 @@
   [summary prop]
   {:pre [(#{:time :memory :n} prop)]}
   (update-in summary [:fns] #(sort-by (comp prop second) > %)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Protocol Ext
+
+(extend-protocol NamedTrace
+  File
+  (trace-name [this]
+    (let [filename (.getName this)]
+      (if (.endsWith filename trace-ext)
+        (subs filename 0 (- (.length filename) (.length trace-ext)))
+        filename)))
+  Trace
+  (trace-name [this]
+    (when-let [^File f (:file this)]
+      (trace-name f))))
+

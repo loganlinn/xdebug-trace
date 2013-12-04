@@ -1,6 +1,7 @@
 (ns xdebug-trace.view.trace
   "Renders HTML for viewing trace"
-  (:require [xdebug-trace.view.layout :refer [defpage]]
+  (:require [xdebug-trace.trace :as trace]
+            [xdebug-trace.view.layout :refer [defpage]]
             [xdebug-trace.view.util :refer [filepath->repo-url]]
             [clj-time.coerce :as tc]
             [clj-time.format :as tf]
@@ -79,28 +80,28 @@
 (defn trace-summary-url [trace-name] (str "/trace/" trace-name "/summary"))
 
 (defn trace-nav
-  ([trace-name] (trace-nav trace-name nil))
-  ([trace-name current]
-   (let [tabs {:view ["View" (trace-url trace-name)]
-               :summary ["Summary" (trace-summary-url trace-name)]}]
-     [:ul.nav.nav-tabs.trace-nav
-      (for [[tab [label url]] tabs]
-        [:li {:class (if (= current tab) "active")}
-         [:a {:href url} label]])])))
+  [trace current-tab]
+  (let [trace-name (trace/trace-name trace)
+        tabs {:view ["View" (trace-url trace-name)]
+              :summary ["Summary" (trace-summary-url trace-name)]}]
+    [:ul.nav.nav-tabs.trace-nav
+     (for [[tab [label url]] tabs]
+       [:li {:class (if (= current-tab tab) "active")}
+        [:a {:href url} label]])]))
 
 (defn trace-header [trace]
   [:div
    [:h4 "Start: " (str (first (:time trace)))]
    [:h4 "End: " (str (second (:time trace)))]])
 
-(defpage render-trace [trace-name trace {:keys [max-depth]}]
+(defpage render-trace [trace {:keys [max-depth]}]
   (defblock head-end
     (page/include-css "/css/trace.css"))
   (defblock content
     [:div.row
      [:div.span12
       (trace-header trace)
-      (trace-nav trace-name :view)
+      (trace-nav trace :view)
       (render-trace-stack (:stack trace) (or max-depth default-max-depth))]]))
 
 ;; TODO Don't take Files
@@ -117,8 +118,7 @@
          [:td "Last Modified"]]]
        [:tbody
         (for [^java.io.File f trace-files]
-          (let [filename (.getName f)
-                trace-name (.substring filename 0 (.lastIndexOf filename "."))
+          (let [trace-name (trace/trace-name f)
                 last-modified (->> (.lastModified f)
                                    (tc/from-long)
                                    (tf/unparse (tf/formatters :rfc822)))
