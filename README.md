@@ -51,6 +51,14 @@ which requires
 using Java 6. I've added a `java6` profile to `project.clj` to help with
 including that dependency: `lein with-profile +java6 trampoline run -m xdebug-trace.main`
 
+## TODO
+
+*   Graphing
+*   Support appended traces
+*   Deeper analysis
+    *   Detect if function deeper down stack is consuming majority of
+        time/memory.
+
 ## License
 
 Copyright © 2013 Logan Linn
