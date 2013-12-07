@@ -2,7 +2,8 @@
   "Renders HTML for viewing trace"
   (:require [xdebug-trace.trace :as trace]
             [xdebug-trace.view.layout :refer [defpage]]
-            [xdebug-trace.view.util :refer [filepath->repo-url]]
+            [xdebug-trace.view.util :refer [filepath->repo-url
+                                            css-bar-chart]]
             [clj-time.coerce :as tc]
             [clj-time.format :as tf]
             [hiccup.page :as page]))
@@ -38,8 +39,10 @@
 (declare render-trace-stack)
 
 (defn render-trace-fn
-  [[trace sub-traces] max-depth]
+  [[trace sub-traces] time-bar-chart mem-bar-chart max-depth]
   (let [{:keys [fn-name fn-num time memory file line-num depth arguments]} trace
+        t-diff (trace/delta time)
+        m-diff (trace/delta memory)
         collapse-id (str "collapse_" fn-num)]
     [:div.panel.panel-default
      {:data-depth depth}
@@ -50,7 +53,9 @@
          {:class (time-class time)} (time-label time)]
         [:span.memory-diff.label.pull-right
          {:class (mem-class memory)} (mem-label memory)]
-        fn-name ]]]
+        fn-name
+        (time-bar-chart time)
+        ]]]
      [:div.panel-collapse.collapse
       {:id collapse-id
        :class (if (< depth intial-collapse-depth) "in")}
@@ -65,13 +70,13 @@
         (for [arg arguments]
           [:li [:code.argument.muted arg]])]
        (if (or (not max-depth) (< depth max-depth))
-         (render-trace-stack sub-traces max-depth))]]]))
+         (render-trace-stack sub-traces time-bar-chart mem-bar-chart max-depth))]]]))
 
 (defn render-trace-stack
-  [trace max-depth]
+  [trace time-bar-chart mem-bar-chart max-depth]
   (when trace
     [:div.trace.accordion
-     (for [tf trace] (render-trace-fn tf max-depth))]))
+     (for [tf trace] (render-trace-fn tf time-bar-chart mem-bar-chart max-depth))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
@@ -89,21 +94,28 @@
        [:li {:class (if (= current-tab tab) "active")}
         [:a {:href url} label]])]))
 
-(defn trace-header [trace]
+(defn trace-header [trace time-total]
   [:div
    [:h3 (trace/trace-name trace)]
-   (if-let [dur (trace/time-delta trace)]
-     [:h4 (format "Total Time %,d ms" dur)])])
+   [:h4 (format "Total Time %,f ms" time-total)]])
 
-(defpage render-trace [trace {:keys [max-depth]}]
+(defpage render-trace [{:keys [time memory stack] :as trace} {:keys [max-depth]}]
   (defblock head-end
     (page/include-css "/css/trace.css"))
   (defblock content
-    [:div.row
-     [:div.span12
-      (trace-header trace)
-      (trace-nav trace :view)
-      (render-trace-stack (:stack trace) (or max-depth default-max-depth))]]))
+    (let [time-start (trace/stack-time-min stack)
+          time-end   (trace/stack-time-max stack)
+          time-total (- time-end time-start)]
+      [:div.row
+       [:div.span12
+        (trace-header trace time-total)
+        (trace-nav trace :view)
+        (render-trace-stack
+          stack
+          #(css-bar-chart (/ (trace/delta %) time-total)
+                          (/ (- (trace/start-val %) time-start) time-total))
+          nil;#(css-bar-chart (trace/delta memory) %1 (- %2 (trace/start-val memory)))
+          (or max-depth default-max-depth))]])))
 
 ;; TODO Don't take Files
 (defpage list-traces [trace-files]

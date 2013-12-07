@@ -1,6 +1,7 @@
 (ns xdebug-trace.view.util
   (:require [xdebug-trace.view.layout :as layout]
             [xdebug-trace.util :refer [query-str]]
+            [hiccup.def :refer [defelem]]
             [environ.core :refer [env]]
             [clojure.string :as str]))
 
@@ -47,3 +48,12 @@
   (-> (:query-params layout/*request*)
       (merge (stringify-keys m))
       query-str))
+
+(defelem css-bar-chart
+  ([width] (css-bar-chart width 0.))
+  ([width offset]
+   [:div.css-bar-chart
+    [:div
+     {:style (str "width:" (format "%.2f" (max (* width 100.) 1.))"%;"
+                  "margin-left:" (format "%.2f" (* offset 100.)) "%")}
+     "&nbsp;"]]))

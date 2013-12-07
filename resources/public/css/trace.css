@@ -23,3 +23,19 @@
 .trace [data-depth="12"] {
   background-color: #f9f9f9;
 }
+
+.css-bar-chart {
+ position: relative;
+ width: 100px;
+ height: 16px;
+ border: 1px solid #ddd;
+ background: #fff;
+}
+
+.css-bar-chart div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #aaa;
+  height: 16px;
+}
