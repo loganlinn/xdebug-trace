@@ -54,6 +54,7 @@ including that dependency: `lein with-profile +java6 trampoline run -m xdebug-tr
 ## TODO
 
 *   Graphing
+*   Summary view should include % of total time/memory
 *   Support appended traces
 *   Deeper analysis
     *   Detect if function deeper down stack is consuming majority of
