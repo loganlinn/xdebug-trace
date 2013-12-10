@@ -32,7 +32,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Records
 
-(defrecord Trace [time stack file])
+(defrecord Trace [start end time memory stack file])
 
 (defrecord TraceFunction
   [fn-name
@@ -77,19 +77,6 @@
 
 (defn time-delta [{[start end] :time}]
   (when end (- end start)))
-
-(defn stack-time-min [stack]
-  (first (:time (ffirst stack))))
-
-(defn stack-time-max [stack]
-  (let [[{[start end] :time :as trace} fns] (last stack)]
-    (cond
-      end end
-      (empty? fns) start
-      :else (recur fns))))
-
-(defn stack-time-range [stack]
-  (- (stack-time-max stack) (stack-time-min stack)))
 
 (defn fn-summary [trace fn-name]
   (->> (:stack trace)

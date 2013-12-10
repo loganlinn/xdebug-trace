@@ -47,7 +47,7 @@
   (defblock content
     [:div.row
      [:div.col-xs-12
-      (trace-header trace (trace/stack-time-range (:stack trace)))
+      (trace-header trace (trace/time-delta trace))
       (trace-nav trace :summary)
       [:div.row [:div.col-xs-12 (n-menu n)]]
       [:h3 "Calls"]

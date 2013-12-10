@@ -45,8 +45,6 @@
   ([] (zipper (make-root)))
   ([root] (zip/zipper (constantly true) node-children make-node root)))
 
-(defn unzip [loc] (zip/root loc))
-
 (defn node-assoc [loc k v]
   (zip/edit loc assoc-in [0 k] v))
 
@@ -100,10 +98,33 @@
           (node-assoc :end (.getTime (l/date line))))
       :else loc)))
 
+(defn min-prop-val [loc prop]
+  (let [loc (-> loc topmost zip/down)
+        [{[start] prop}] (zip/node loc)]
+    start))
+
+(defn max-prop-val [loc prop]
+  (loop [loc (-> loc topmost zip/down zip/rightmost)]
+    (let [[{[start end] prop}] (zip/node loc)]
+      (cond
+        end end
+        (zip/children loc) (recur (-> loc zip/down zip/rightmost))
+        :else start))))
+
+(defn assoc-zip-metadata [loc]
+  (-> (topmost loc)
+      (node-assoc :time-min (min-prop-val loc :time))
+      (node-assoc :time-max (max-prop-val loc :time))
+      (node-assoc :mem-min (min-prop-val loc :memory))
+      (node-assoc :mem-max (max-prop-val loc :memory))))
+
 (defn- create-trace [file root-node]
   (let [root (node-value root-node)
         stack (node-children root-node)]
-    (trace/map->Trace {:time [(:start root) (:end root)]
+    (trace/map->Trace {:time [(:time-min root) (:time-max root)]
+                       :memory [(:mem-min root) (:mem-max root)]
+                       :start (:start root)
+                       :end (:end root)
                        :stack stack
                        :file file})))
 
@@ -112,7 +133,7 @@
 
 (defn read-trace-lines [lines]
   (let [build-trace #(reduce accept-line % lines)]
-    (-> (zipper) (build-trace) (unzip))))
+    (-> (zipper) (build-trace) (assoc-zip-metadata) (zip/root))))
 
 (comment
  (defn lazy-read-trace

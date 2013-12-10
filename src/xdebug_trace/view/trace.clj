@@ -103,8 +103,8 @@
   (defblock head-end
     (page/include-css "/css/trace.css"))
   (defblock content
-    (let [time-start (trace/stack-time-min stack)
-          time-end   (trace/stack-time-max stack)
+    (let [time-start (trace/start-val (:time trace))
+          time-end   (trace/end-val (:time trace))
           time-total (- time-end time-start)]
       [:div.row
        [:div.span12
