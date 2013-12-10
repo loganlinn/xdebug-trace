@@ -39,7 +39,7 @@
 (declare render-trace-stack)
 
 (defn render-trace-fn
-  [[trace sub-traces] time-bar-chart mem-bar-chart max-depth]
+  [[trace sub-traces] time-bar-chart max-depth]
   (let [{:keys [fn-name fn-num time memory file line-num depth arguments]} trace
         t-diff (trace/delta time)
         m-diff (trace/delta memory)
@@ -54,7 +54,7 @@
         [:span.memory-diff.label.pull-right
          {:class (mem-class memory)} (mem-label memory)]
         fn-name
-        (time-bar-chart time)
+        ;(time-bar-chart time)
         ]]]
      [:div.panel-collapse.collapse
       {:id collapse-id
@@ -70,13 +70,13 @@
         (for [arg arguments]
           [:li [:code.argument.muted arg]])]
        (if (or (not max-depth) (< depth max-depth))
-         (render-trace-stack sub-traces time-bar-chart mem-bar-chart max-depth))]]]))
+         (render-trace-stack sub-traces time-bar-chart max-depth))]]]))
 
 (defn render-trace-stack
-  [trace time-bar-chart mem-bar-chart max-depth]
+  [trace time-bar-chart max-depth]
   (when trace
     [:div.trace.accordion
-     (for [tf trace] (render-trace-fn tf time-bar-chart mem-bar-chart max-depth))]))
+     (for [tf trace] (render-trace-fn tf time-bar-chart max-depth))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
@@ -114,7 +114,6 @@
           stack
           #(css-bar-chart (/ (trace/delta %) time-total)
                           (/ (- (trace/start-val %) time-start) time-total))
-          nil;#(css-bar-chart (trace/delta memory) %1 (- %2 (trace/start-val memory)))
           (or max-depth default-max-depth))]])))
 
 ;; TODO Don't take Files
