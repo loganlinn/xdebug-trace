@@ -69,8 +69,9 @@
 
 (defn end-val [interval] (nth interval 1))
 
-(defn delta
-  [[start end]] (if end (- end start) 0))
+(defn diff [[start end]] (when end (- end start)))
+
+(defn delta [[start end]] (if end (- end start) 0))
 
 (defn memory-delta [{[start end] :memory}]
   (when end (- end start)))
@@ -127,6 +128,14 @@
   [summary prop]
   {:pre [(#{:time :memory :n} prop)]}
   (update-in summary [:fns] #(sort-by (comp prop second) > %)))
+
+(defn significant-child?
+  ([parent child] (significant-child? parent child :time))
+  ([parent child prop] (significant-child? parent child prop 0.4))
+  ([parent child prop threshold]
+   (let [pv (-> parent prop diff)
+         cv (-> child prop diff)]
+     (and pv cv (> (float (/ cv pv)) threshold)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Protocol Ext

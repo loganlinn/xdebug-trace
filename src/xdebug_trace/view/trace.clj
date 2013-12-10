@@ -39,13 +39,15 @@
 (declare render-trace-stack)
 
 (defn render-trace-fn
-  [[trace sub-traces] time-bar-chart max-depth]
-  (let [{:keys [fn-name fn-num time memory file line-num depth arguments]} trace
+  [parent-fn [tfn sub-traces] time-bar-chart max-depth]
+  (let [{:keys [fn-name fn-num time memory file line-num depth arguments]} tfn
         t-diff (trace/delta time)
         m-diff (trace/delta memory)
+        significant? (and parent-fn (trace/significant-child? parent-fn tfn))
         collapse-id (str "collapse_" fn-num)]
-    [:div.panel.panel-default
-     {:data-depth depth}
+    [:div.panel
+     {:data-depth depth
+      :class (if significant? "panel-info" "panel-default")}
      [:div.panel-heading
       [:h4.panel-title
        [:a {:data-toggle "collapse" :href (str "#" collapse-id)}
@@ -70,13 +72,16 @@
         (for [arg arguments]
           [:li [:code.argument.muted arg]])]
        (if (or (not max-depth) (< depth max-depth))
-         (render-trace-stack sub-traces time-bar-chart max-depth))]]]))
+         (render-trace-stack tfn sub-traces time-bar-chart max-depth))]]]))
 
 (defn render-trace-stack
-  [trace time-bar-chart max-depth]
-  (when trace
-    [:div.trace.accordion
-     (for [tf trace] (render-trace-fn tf time-bar-chart max-depth))]))
+  ([stack time-bar-chart max-depth]
+   (render-trace-stack nil stack time-bar-chart max-depth ))
+  ([parent-fn stack time-bar-chart max-depth]
+   (when stack
+     [:div.trace.accordion
+      (for [tfn stack]
+        (render-trace-fn parent-fn tfn time-bar-chart max-depth))])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
