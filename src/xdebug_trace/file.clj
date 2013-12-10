@@ -21,7 +21,8 @@
   (let [file-filter (trace-files-filter)]
     (->> trace-dirs
          (mapcat (fn [^File dir] (.listFiles dir file-filter)))
-         (distinct-on (fn [^File f] (.getName f))))))
+         (distinct-on (fn [^File f] (.getName f)))
+         (sort-by #(.lastModified %) >))))
 
 (defn find-trace [trace-dirs trace-name]
   (let [file-filter (trace-file-filter trace-name)]
