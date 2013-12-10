@@ -1,5 +1,6 @@
 (ns xdebug-trace.view.trace-summary
-  (:require [xdebug-trace.view.layout :refer [defpage]]
+  (:require [xdebug-trace.trace :as trace]
+            [xdebug-trace.view.layout :refer [defpage]]
             [xdebug-trace.view.trace :refer [trace-nav trace-header]]
             [xdebug-trace.view.util :refer [merged-query-str]]
             [clj-time.coerce :as tc]
@@ -46,7 +47,7 @@
   (defblock content
     [:div.row
      [:div.col-xs-12
-      (trace-header trace)
+      (trace-header trace (trace/stack-time-range (:stack trace)))
       (trace-nav trace :summary)
       [:div.row [:div.col-xs-12 (n-menu n)]]
       [:h3 "Calls"]
