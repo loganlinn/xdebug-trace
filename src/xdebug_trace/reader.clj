@@ -98,11 +98,13 @@
           (node-assoc :end (.getTime (l/date line))))
       :else loc)))
 
+;; TODO ignore xdebug_* functions
 (defn min-prop-val [loc prop]
   (let [loc (-> loc topmost zip/down)
         [{[start] prop}] (zip/node loc)]
     start))
 
+;; TODO ignore xdebug_* functions
 (defn max-prop-val [loc prop]
   (loop [loc (-> loc topmost zip/down zip/rightmost)]
     (let [[{[start end] prop}] (zip/node loc)]
