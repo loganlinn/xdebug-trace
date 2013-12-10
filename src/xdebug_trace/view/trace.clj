@@ -11,9 +11,9 @@
 (def intial-collapse-depth 1)
 (def default-max-depth 8)
 
-(defn time-label [[start end]]
+(defn time-label [{[start end] :time est? :time-estimated?}]
   (if-not end "?"
-    (format "%.2f ms" (- end start))))
+    (format (str (if est? "> ") "%.2f ms") (- end start))))
 
 (defn time-class [[start end]]
   (when end
@@ -23,9 +23,9 @@
         (> diff 0.1) "label-info"
         :else "label-default"))))
 
-(defn mem-label [[start end]]
+(defn mem-label [{[start end] :memory est? :memory-estimated?}]
   (if-not end "?"
-    (format "%+,d bytes" (- end start))))
+    (format (str (if est? "> ") "%+,d bytes") (- end start))))
 
 (defn mem-class [[start end]]
   (when end
@@ -52,9 +52,9 @@
       [:h4.panel-title
        [:a {:data-toggle "collapse" :href (str "#" collapse-id)}
         [:span.time-diff.label.pull-right
-         {:class (time-class time)} (time-label time)]
+         {:class (time-class time)} (time-label tfn)]
         [:span.memory-diff.label.pull-right
-         {:class (mem-class memory)} (mem-label memory)]
+         {:class (mem-class memory)} (mem-label tfn)]
         fn-name
         ;(time-bar-chart time)
         ]]]

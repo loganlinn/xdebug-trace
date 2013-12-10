@@ -48,6 +48,9 @@
 (defn node-assoc [loc k v]
   (zip/edit loc assoc-in [0 k] v))
 
+(defn node-assoc-in [loc ks v]
+  (zip/edit loc assoc-in (cons 0 ks) v))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Zipper Operations
 
@@ -60,6 +63,14 @@
       (if p
         (recur p)
         loc))))
+
+(defn bottom-rightmost
+  "Returns loc of bottom rightmost node"
+  [loc]
+  (let [loc (zip/rightmost loc)]
+    (if (seq (zip/children loc))
+      (recur (zip/down loc))
+      loc)))
 
 (defn enter-fn [loc line]
   (let [depth (-> loc zip/node node-value (:depth 0))]
@@ -113,12 +124,28 @@
         (zip/children loc) (recur (-> loc zip/down zip/rightmost))
         :else start))))
 
+(defn- prop-end-val? [loc prop]
+  (let [[{[_ end] prop}] (zip/node loc)]
+    (boolean end)))
+
+(defn fill-prop-end-val [loc prop v]
+  (loop [loc (bottom-rightmost loc)]
+    (cond
+      (prop-end-val? loc prop) loc
+      (nil? (zip/up loc)) loc
+      :else (recur (-> loc
+                       (node-assoc-in [prop 1] v)
+                       (node-assoc :time-estimated? true)
+                       zip/up)))))
+
 (defn assoc-zip-metadata [loc]
-  (-> (topmost loc)
-      (node-assoc :time-min (min-prop-val loc :time))
-      (node-assoc :time-max (max-prop-val loc :time))
-      (node-assoc :mem-min (min-prop-val loc :memory))
-      (node-assoc :mem-max (max-prop-val loc :memory))))
+  (let [time-max (max-prop-val loc :time)]
+    (-> loc
+        (node-assoc :time-min (min-prop-val loc :time))
+        (node-assoc :time-max time-max)
+        (node-assoc :mem-min (min-prop-val loc :memory))
+        (node-assoc :mem-max (max-prop-val loc :memory))
+        (fill-prop-end-val :time time-max))))
 
 (defn- create-trace [file root-node]
   (let [root (node-value root-node)
