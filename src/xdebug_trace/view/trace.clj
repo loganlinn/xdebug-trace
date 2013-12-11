@@ -13,7 +13,7 @@
 
 (defn time-badge [{[start end] :time est? :time-estimated?}]
   (let [diff (when end (- end start))
-        c (cond (not diff) nil
+        c (cond (not diff) "label-default"
                 (> diff 10.) "label-warning"
                 (> diff 0.1) "label-info"
                 :else "label-default")]
