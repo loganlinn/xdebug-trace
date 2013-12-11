@@ -11,30 +11,29 @@
 (def intial-collapse-depth 1)
 (def default-max-depth 8)
 
-(defn time-label [{[start end] :time est? :time-estimated?}]
-  (if-not end "?"
-    (format (str (if est? "> ") "%.2f ms") (- end start))))
+(defn time-badge [{[start end] :time est? :time-estimated?}]
+  (let [diff (when end (- end start))
+        c (cond (not diff) nil
+                (> diff 10.) "label-warning"
+                (> diff 0.1) "label-info"
+                :else "label-default")]
+    [:span.time-diff.label.pull-right
+     {:class c}
+     (if diff
+       (format (str (if est? "> ") "%.2f ms") diff)
+       "?")]))
 
-(defn time-class [[start end]]
+(defn mem-badge [{[start end] :memory est? :memory-estimated?}]
   (when end
-    (let [diff (- end start)]
-      (cond
-        (> diff 10.) "label-warning"
-        (> diff 0.1) "label-info"
-        :else "label-default"))))
-
-(defn mem-label [{[start end] :memory est? :memory-estimated?}]
-  (if-not end "?"
-    (format (str (if est? "> ") "%+,d bytes") (- end start))))
-
-(defn mem-class [[start end]]
-  (when end
-    (let [diff (- end start)]
-      (cond
-        (= diff 0) "label-default"
-        (> diff 128) "label-danger"
-        (> diff 0) "label-info"
-        :else "label-success"))))
+    (let [diff (- end start)
+          c (cond
+              (= diff 0) "label-default"
+              (> diff 128) "label-danger"
+              (> diff 0) "label-info"
+              :else "label-success")]
+      [:span.memory-diff.label.pull-right
+       {:class c}
+       (format (str (if est? "> ") "%+,d bytes") diff)])))
 
 (declare render-trace-stack)
 
@@ -51,10 +50,8 @@
      [:div.panel-heading
       [:h4.panel-title
        [:a {:data-toggle "collapse" :href (str "#" collapse-id)}
-        [:span.time-diff.label.pull-right
-         {:class (time-class time)} (time-label tfn)]
-        [:span.memory-diff.label.pull-right
-         {:class (mem-class memory)} (mem-label tfn)]
+        (time-badge tfn)
+        (mem-badge tfn)
         fn-name
         ;(time-bar-chart time)
         ]]]
