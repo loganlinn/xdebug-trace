@@ -72,6 +72,18 @@
       (recur (zip/down loc))
       loc)))
 
+(defn up-while
+  "Returns location after stepping up the zipper while (f loc) returns true or
+  until top or end is reached"
+  [loc f]
+  (if (zip/end? loc)
+    loc
+    (if-let [up (zip/up loc)]
+      (if (f loc)
+        (recur up f)
+        loc)
+      loc)))
+
 (defn enter-fn [loc line]
   (let [depth (-> loc zip/node node-value (:depth 0))]
     (-> loc
@@ -129,14 +141,13 @@
     (boolean end)))
 
 (defn fill-prop-end-val [loc prop v]
-  (loop [loc (bottom-rightmost loc)]
-    (cond
-      (prop-end-val? loc prop) loc
-      (nil? (zip/up loc)) loc
-      :else (recur (-> loc
-                       (node-assoc-in [prop 1] v)
-                       (node-assoc :time-estimated? true)
-                       zip/up)))))
+  (loop [loc (-> loc bottom-rightmost (up-while #(prop-end-val? % prop)))]
+    (if (or (prop-end-val? loc prop) (nil? (zip/up loc)))
+      loc
+      (recur (-> loc
+                 (node-assoc-in [prop 1] v)
+                 (node-assoc :time-estimated? true)
+                 zip/up)))))
 
 (defn assoc-zip-metadata [loc]
   (let [time-max (max-prop-val loc :time)]
