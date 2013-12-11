@@ -116,6 +116,7 @@
         (trace-header trace time-total)
         (trace-nav trace :view)
         (render-trace-stack
+          trace
           stack
           #(css-bar-chart (/ (trace/delta %) time-total)
                           (/ (- (trace/start-val %) time-start) time-total))
